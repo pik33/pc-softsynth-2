@@ -1,0 +1,226 @@
+unit Unit4; 
+
+// PC Softsynth
+// License: GNU GPL
+// see README for details
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, Buttons, ComCtrls, Grids, ExtCtrls, SynEdit,math;
+
+type
+
+  { TForm4 }
+
+  TForm4 = class(TForm)
+    Bevel1: TBevel;
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
+    BitBtn7: TBitBtn;
+    BitBtn8: TBitBtn;
+    ComboBox1: TComboBox;
+    Edit1: TEdit;
+    Edit10: TEdit;
+    Edit11: TEdit;
+    Edit2: TEdit;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    Edit5: TEdit;
+    Edit6: TEdit;
+    Edit7: TEdit;
+    Edit8: TEdit;
+    Edit9: TEdit;
+    Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label12: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label2: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    ListBox1: TListBox;
+    OpenDialog1: TOpenDialog;
+    SynEdit1: TSynEdit;
+    procedure Bevel1ChangeBounds(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure BitBtn6Click(Sender: TObject);
+    procedure BitBtn8Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure ListBox1Click(Sender: TObject);
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end;
+
+
+TPreset=record
+  name,wave,adsr,vibwave:string;
+  vol,len,pause,viblen,vibstr,echo:integer;
+  int:double;
+  end;
+
+fpreset=file of TPreset;
+
+var
+  Form4: TForm4;
+  presets:array[0..1024] of TPreset;
+  pn:integer;
+
+implementation
+
+uses unit1,unit5;
+
+{ TForm4 }
+
+procedure TForm4.ListBox1Click(Sender: TObject);
+begin
+ // label1.caption:=listbox1.getselectedtext;;
+end;
+
+procedure TForm4.Bevel1ChangeBounds(Sender: TObject);
+begin
+
+end;
+
+procedure TForm4.BitBtn1Click(Sender: TObject);
+begin
+  form5.showmodal;
+end;
+
+procedure TForm4.BitBtn4Click(Sender: TObject);
+begin
+
+end;
+
+procedure TForm4.BitBtn5Click(Sender: TObject);
+
+            var i:integer;
+
+              begin
+              i:=-1;
+  realtime:=true;
+  play:=true;
+            state2[i].sample:=defaults[i].sample;  //channel
+            state2[i].adsr:=defaults[i].adsr;  //adsr
+            state2[i].freq:=440; //freq
+            state2[i].vol:=defaults[i].vol/32768; //vol
+            state2[i].len:=round(44.1*defaults[i].len); //len
+            state2[i].normfreq:=state2[i].freq*norm44;
+            state2[i].samplenum:=0;
+            state2[i].spos:=0;
+            state2[i].apos:=0;        // chyba niepotrzebnie
+            state2[i].transition:=441; // 1 ms transition time;
+            state2[i].trans_delta:=1/state2[i].transition; // delta gain for transition
+            state2[i].vib_dev:=0;
+            state2[i].gliss_dev:=0;
+            state2[i].intchn:=-2;
+            state2[i].intfreq:=0;
+            state2[i].gliss_df:=0;
+            state2[i].gliss_par2:=0;
+
+end;
+
+procedure TForm4.BitBtn6Click(Sender: TObject);
+begin
+  realtime:=false;
+end;
+
+procedure TForm4.BitBtn8Click(Sender: TObject);
+begin
+  form5.edit1.text:='New_preset';
+  form5.edit2.text:='';
+  form5.edit3.text:='';
+  form5.edit4.text:='15';
+  form5.edit5.text:='100';
+  form5.edit6.text:='100';
+  form5.edit7.text:='';
+  form5.edit8.text:='';
+  form5.edit9.text:='';
+  form5.edit10.text:='';
+  form5.edit11.text:='';
+  form5.showmodal;
+  if form5.modalresult=mrok then
+    begin
+    inc(pn);
+    presets[pn].name:=form5.edit1.text;
+    presets[pn].wave:=form5.edit2.text;
+    presets[pn].adsr:=form5.edit3.text;
+    presets[pn].vol:=round(strtofloat2(form5.edit4.text));
+    presets[pn].len:=round(strtofloat2(form5.edit5.text));
+    presets[pn].pause:=round(strtofloat2(form5.edit6.text));
+    presets[pn].vibwave:=form5.edit7.text;
+    if form5.edit8.text<>'' then presets[pn].viblen:=round(strtofloat2(form5.edit8.text)) else presets[pn].viblen:=0;
+    if form5.edit9.text<>'' then presets[pn].vibstr:=round(strtofloat2(form5.edit9.text)) else presets[pn].vibstr:=0;
+    if form5.edit10.text<>'' then presets[pn].echo:=round(strtofloat2(form5.edit10.text)) else presets[pn].echo:=0;
+
+    end;
+    if form5.edit11.text<>'' then presets[pn].int:=trunc(1000000*strtofloat2(form5.edit11.text))/1000000 else  presets[pn].int:=0;
+    listbox1.items.add(presets[pn].name);
+    edit1.text:=presets[pn].name;
+    edit2.text:=presets[pn].wave;
+    edit3.text:=presets[pn].adsr;
+    edit4.text:=inttostr(presets[pn].vol);
+    edit5.text:=inttostr(presets[pn].len);
+    edit6.text:=inttostr(presets[pn].pause);
+    edit7.text:=presets[pn].vibwave;
+    edit8.text:=inttostr(presets[pn].viblen);
+    edit9.text:=inttostr(presets[pn].vibstr);
+    edit10.text:=inttostr(presets[pn].echo);
+    edit11.text:=floattostrf(presets[pn].int,fffixed,6,3)
+
+
+end;
+
+
+procedure TForm4.FormShow(Sender: TObject);
+
+var f:FPreset;
+    filename,path:string;
+    i:integer;
+    sr:Tsearchrec;
+
+begin
+path:=getuserdir;
+filename:=path+'softsynth.pre';
+assignfile(f,filename);
+pn:=0;
+if fileexists(filename) then
+  begin
+  assignfile(f,filename);
+  reset(f);
+  pn:=0;
+  while not eof(f) do
+    begin
+    read(f,presets[pn]);
+    inc(pn);
+    end;
+  end
+else rewrite(f);
+closefile(f);
+listbox1.Items.clear;
+for i:=1 to pn do listbox1.Items.add(presets[i].name);
+if listbox1.items.count>0 then listbox1.selected[0]:=true;
+end;
+
+initialization
+  {$I unit4.lrs}
+
+
+end.

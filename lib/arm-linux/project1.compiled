@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="/usr/local/bin/fpc" Date="1425382451"/>
+  <Params Value=" -MObjFPC -Scghi -O1 -g -gl -l -vewnhibq -Fi/home/pi/programowanie/pcsofstynth-007-135-src/lib/arm-linux -Fl/opt/gnome/lib -Fu/usr/local/share/lazarus/components/synedit/units/arm-linux/gtk2 -Fu/usr/local/share/lazarus/lcl/units/arm-linux/gtk2 -Fu/usr/local/share/lazarus/lcl/units/arm-linux -Fu/usr/local/share/lazarus/components/lazutils/lib/arm-linux -Fu/home/pi/programowanie/fft/lib/arm-linux -Fu/usr/local/share/lazarus/packager/units/arm-linux -Fu/home/pi/programowanie/pcsofstynth-007-135-src/ -FU/home/pi/programowanie/pcsofstynth-007-135-src/lib/arm-linux/ -dLCL -dLCLgtk2 project1.lpr"/>
+</CONFIG>

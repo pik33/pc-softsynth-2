@@ -1,0 +1,143 @@
+unit Unit5; 
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, Buttons;
+
+type
+
+  { TForm5 }
+
+  TForm5 = class(TForm)
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
+    Edit1: TEdit;
+    Edit10: TEdit;
+    Edit11: TEdit;
+    Edit2: TEdit;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    Edit5: TEdit;
+    Edit6: TEdit;
+    Edit7: TEdit;
+    Edit8: TEdit;
+    Edit9: TEdit;
+    Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label12: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label6: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    ListBox1: TListBox;
+    ListBox2: TListBox;
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
+    procedure FormShow(Sender: TObject);
+    procedure ListBox1SelectionChange(Sender: TObject; User: boolean);
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end; 
+
+var
+  Form5: TForm5; 
+
+implementation
+uses unit1,unit4;
+
+{ TForm5 }
+
+procedure TForm5.FormShow(Sender: TObject);
+
+
+  var f:FPreset;
+    s,filename,path:string;
+    i,pn:integer;
+    sr:Tsearchrec;
+
+begin
+path:=s_dir;
+listbox1.items.clear;
+if findfirst(path+'*.s2',0,sr)=0 then
+  begin
+  s:=copy(sr.name,1,length(sr.name)-3);
+  listbox1.items.Add(s);
+  repeat
+    i:=findnext(sr);
+    s:=copy(sr.name,1,length(sr.name)-3);
+    if i=0 then listbox1.items.add(s);
+  until i<>0;
+  findclose(sr);
+  end;
+if listbox1.items.count>0 then listbox1.selected[0]:=true;
+path:=h_dir;
+listbox2.items.clear;
+if findfirst(path+'*.h2',0,sr)=0 then
+  begin
+  s:=copy(sr.name,1,length(sr.name)-3);
+  listbox2.items.Add(s);
+  repeat
+    i:=findnext(sr);
+    s:=copy(sr.name,1,length(sr.name)-3);
+    if i=0 then listbox2.items.add(s);
+  until i<>0;
+  findclose(sr);
+  end;
+if listbox2.items.count>0 then listbox2.selected[0]:=true;
+end;
+
+procedure TForm5.BitBtn3Click(Sender: TObject);
+begin
+  edit2.text:=listbox1.GetSelectedText;
+end;
+
+procedure TForm5.BitBtn1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TForm5.BitBtn4Click(Sender: TObject);
+begin
+  edit3.text:=listbox2.getselectedtext;
+end;
+
+procedure TForm5.BitBtn5Click(Sender: TObject);
+begin
+  edit7.text:=listbox1.getselectedtext;
+end;
+
+procedure TForm5.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+//if  messagedlg('test!!!',MtError,[MbYes,MbNo],0)=MrNo then canclose:=false else canclose:=true;;
+end;
+
+procedure TForm5.ListBox1SelectionChange(Sender: TObject; User: boolean);
+begin
+//edit2.text:=listbox1.getselectedtext;
+end;
+
+
+initialization
+  {$I unit5.lrs}
+
+end.
+
