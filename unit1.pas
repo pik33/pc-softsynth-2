@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, Buttons, SynEdit, fft, sdl, math, lcltype, Menus;
+  ExtCtrls, ComCtrls, Buttons, SynEdit, fft, sdl2, math, lcltype, Menus;
 
 type
 
@@ -105,8 +105,8 @@ type
 
   const maxchannel=32;
         maxdefs=1024;
-        buflen=441000;
-        ver='0.08 alpha-20150308 build 150';
+        buflen=960000;
+        ver='1.91 alpha-20250324 build 151';
 
   type
   TSoundinfo=record

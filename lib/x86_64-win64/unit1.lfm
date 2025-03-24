@@ -14,7 +14,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnResize = FormResize
   Position = poDesktopCenter
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '3.2.0.0'
   object Bevel3: TBevel
     Left = 4
     Height = 320
@@ -93,9 +93,9 @@ object Form1: TForm1
     Width = 262
     AutoSize = False
     AutoSelect = False
+    TabOrder = 0
     OnChange = Edit1Change
     OnKeyPress = Edit1KeyPress
-    TabOrder = 0
   end
   object BitBtn4: TBitBtn
     Left = 152
@@ -159,21 +159,21 @@ object Form1: TForm1
   end
   object CheckBox2: TCheckBox
     Left = 40
-    Height = 19
+    Height = 18
     Top = 496
-    Width = 75
+    Width = 73
     Caption = '11 KHz/4bit'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnChange = CheckBox2Change
     ParentFont = False
     TabOrder = 10
+    OnChange = CheckBox2Change
   end
   object CheckBox3: TCheckBox
     Left = 168
-    Height = 19
+    Height = 18
     Top = 476
-    Width = 54
+    Width = 52
     Caption = 'Repeat'
     Font.Height = -11
     Font.Name = 'Sans'
@@ -232,27 +232,27 @@ object Form1: TForm1
   end
   object CheckBox5: TCheckBox
     Left = 40
-    Height = 19
+    Height = 18
     Top = 476
-    Width = 110
+    Width = 108
     Caption = 'Use Atari .s and .h'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = CheckBox5Click
     ParentFont = False
     TabOrder = 14
+    OnClick = CheckBox5Click
   end
   object CheckBox6: TCheckBox
     Left = 168
-    Height = 19
+    Height = 18
     Top = 500
-    Width = 73
+    Width = 71
     Caption = 'Save .wav'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnChange = CheckBox6Change
     ParentFont = False
     TabOrder = 15
+    OnChange = CheckBox6Change
   end
   object Memo1: TMemo
     Left = 12
@@ -268,13 +268,13 @@ object Form1: TForm1
     Lines.Strings = (
       'Ready'
     )
-    OnEnter = Memo1Enter
     ParentFont = False
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 16
     TabStop = False
     WantTabs = True
+    OnEnter = Memo1Enter
   end
   inline SynEdit1: TSynEdit
     Left = 424

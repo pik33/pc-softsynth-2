@@ -105,8 +105,8 @@ type
 
   const maxchannel=32;
         maxdefs=1024;
-        buflen=441000;
-        ver='0.08 alpha-20150308 build 150';
+        buflen=960000;
+        ver='1.91 alpha-20250324 build 151';
 
   type
   TSoundinfo=record
@@ -4133,7 +4133,7 @@ end;
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   form1.caption:='Malina Softsynth '+ver;
-  decimalseparator:='.';
+  DefaultFormatSettings.DecimalSeparator:='.';
 //  form1.synedit1.gutter.visible:=false;
 //  form1.synedit1.Gutter.autosize:=false;
 //  form1.synedit1.gutter.width:=0;
