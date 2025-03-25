@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, Buttons, SynEdit, fft, sdl2, math, lcltype, Menus;
+  ExtCtrls, ComCtrls, Buttons, SynEdit, fft, sdl3, math, lcltype, Menus;
 
 type
 
@@ -284,6 +284,11 @@ var
   fhw,fht:integer;
   tempfilename:string;
   wave:boolean;
+
+  spec:TSDL_AudioSpec;
+  stream:PSDL_AudioStream;
+
+
 
 procedure starttrack;
 procedure endtrack(time:integer);
@@ -2886,10 +2891,36 @@ for k:=0 to (length div 4)-1 do
 end;
 if wave then
   begin
-  for i:=0 to length-1 do bufor[i]:=audio[i];
+  for i:=0 to length-1 do bufor[i]:=Pbyte(audio)[i];
   filewrite(fht,bufor,length);
   end;
 p102:
+end;
+
+
+procedure AudioCallback3(userdata:pointer; audio:PSDL_audiostream; length:longint; total:longint); cdecl;
+
+
+
+begin
+if (length > 0) then
+  begin
+ // data:=SDL_stack_alloc(Uint8, additional_amount)
+{
+    /* Calculate a little more audio here, maybe using `userdata`, write it to `stream`
+     *
+     * If you want to use the original callback, you could do something like this:
+     */
+    if (additional_amount > 0) {
+        Uint8 *data = SDL_stack_alloc(Uint8, additional_amount);
+        if (data) {
+            MyAudioCallback(userdata, data, additional_amount);
+            SDL_PutAudioStreamData(stream, data, additional_amount);
+            SDL_stack_free(data);
+        }
+    }
+}
+end;
 end;
 
 //--------------------------MIDI Decoding---------------------------------------
@@ -3620,26 +3651,31 @@ function sdl_sound_init:integer;
 
 // Zainicjuj bibliotekę sdl_sound
 
+
+
 begin
 Result:=0;
 
-if SDL_Init(SDL_INIT_AUDIO) <> 0 then
+if not SDL_Init(SDL_INIT_AUDIO) then
   begin
   Result:=-1; // sdl_audio nie da się zainicjować
   exit;
   end;
 
-desired.freq := 44100;                                     // sample rate
-desired.format := AUDIO_S16;                               // 16-bit samples
-desired.samples := 4096;                                   // sample na 1 callback
-desired.channels := 2;                                     // stereo
-desired.callback := @AudioCallback;
-desired.userdata := nil;                                   // niepotrzebne poki co
 
-if (SDL_OpenAudio(@desired, @obtained) < 0) then
-  begin
-  Result:=-2;   // nie da się otworzyć urządzenia
-  end;
+spec.freq := 44100;                                     // sample rate
+spec.format := SDL_AUDIO_S16;                               // 16-bit samples
+spec.channels := 2;                                     // stereo
+
+stream := SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, @spec, @AudioCallback3, nil);
+SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(stream));
+
+
+
+//if (SDL_OpenAudio(@desired, @obtained) < 0) then
+//  begin
+//  Result:=-2;   // nie da się otworzyć urządzenia
+//  end;
 end;
 
 
@@ -4269,7 +4305,7 @@ MLast.next:=nil;
 
 // uruchom sdl audio
 
-sdl_pauseaudio(0);
+sdl_pauseaudiodevice(0);
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
