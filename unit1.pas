@@ -44,6 +44,7 @@ type
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
+    Label8: TLabel;
     Memo1: TMemo;
     OpenDialog1: TOpenDialog;
     OpenDialog2: TOpenDialog;
@@ -206,7 +207,7 @@ type
 const a212=1.0594630943592953098431053149397484958; //2^1/12
       c03=16.351597831287416763959505349330137242; //C-4
       norm44=0.02321995464852607709750566893424;   // freq normalize const, 1024/44100
-
+      norm192=0.00533333333333333333333333333333;
 var
   Form1: TForm1;
   desired,obtained:TSDL_AudioSpec;                // zmienne do inicjacji audio
@@ -288,7 +289,7 @@ var
   spec:TSDL_AudioSpec;
   stream:PSDL_AudioStream;
 
-
+  wavebuf:array[0..buflen-1] of byte;
 
 procedure starttrack;
 procedure endtrack(time:integer);
@@ -535,7 +536,7 @@ p101:
     spl:=spl*vstate[i].vol; // vol normalizowane do 0..1 float
     inc(samplenum);
     vstate[i].samplenum:=samplenum;
-    state[i].vib_dev:=norm44*spl;
+    state[i].vib_dev:=norm192*spl;
     end;
   end;
 p199:
@@ -588,7 +589,7 @@ for i:=-1 to maxchannel do
   if cn=i then vol:=state[i].vol else vol:=defaults[i].vol/32768;
   len:=state[cn].len;             //długośc w próbkach
   intchn:=state[i].intchn;
-  int_dev:=state[i].intfreq*norm44;
+  int_dev:=state[i].intfreq*norm192;
   gliss_dev1:=0;
   gliss_dev2:=0;
   gliss_dev3:=0;
@@ -600,7 +601,7 @@ for i:=-1 to maxchannel do
         begin
      //   state[cn].normfreq+=state[cn].gliss_dev;  //gliss_dev wg normalizowanej częstotliwości
           gliss_dev1:=samplenum*state[cn].gliss_dev;
-          gliss_dev2:=norm44*6.6*state[cn].gliss_par2*(sqr((samplenum/44100)-(state[cn].gliss_time/2000))-state[cn].gliss_df);
+          gliss_dev2:=norm192*6.6*state[cn].gliss_par2*(sqr((samplenum/192000)-(state[cn].gliss_time/2000))-state[cn].gliss_df);
           gliss_dev3:=gliss_dev1+gliss_dev2;
  //         while gliss_dev3>128 do gliss_dev3-=128;
  //         while gliss_dev3<-128 do gliss_dev3+=128;
@@ -622,7 +623,7 @@ for i:=-1 to maxchannel do
     pos2:=(pos1+1) mod 1024;
     pos3:=frac(state[i].spos);
 
-    if (wavetable[sample].noise=0) or (((df+int_dev)/norm44)<20) then
+    if (wavetable[sample].noise=0) or (((df+int_dev)/norm192)<20) then
       begin
       spl11:=samples[sample,pos1];
       spl12:=samples[sample,pos2];
@@ -1463,9 +1464,9 @@ if wave and (mode=1) then
   bufor[21]:=0;
   bufor[22]:=2; //chn
   bufor[23]:=0;
-  bufor[24]:=$44;//smpls p.s.
-  bufor[25]:=$AC;
-  bufor[26]:=0;
+  bufor[24]:=$00;//smpls p.s.
+  bufor[25]:=$EE;
+  bufor[26]:=2;
   bufor[27]:=0;
   bufor[28]:=$10;//bits p.s.
   bufor[29]:=$B1;
@@ -2681,7 +2682,8 @@ for k:=0 to (length div 4)-1 do
   begin
   if play then begin
   old_ptime:=trunc(ptime);
-  ptime:=ptime+0.02267573696145124717; //milisekundy
+  //  ptime:=ptime+0.02267573696145124717; //milisekundy
+  ptime:=ptime+0.02267573696145124717*44100/192000; //milisekundy
   new_ptime:=trunc(ptime);
 
   if (not realtime) and play and (old_ptime<>new_ptime) then // zmiana całej milisekundy - sprawdź tablice
@@ -2714,8 +2716,8 @@ for k:=0 to (length div 4)-1 do
             if csr[i]^.p2<>-2 then state2[i].adsr:=csr[i]^.p2 else state2[i].adsr:=defaults[i].adsr;  //adsr
             if csr[i]^.p3<>-2 then state2[i].freq:=csr[i]^.p3/1000 else state2[i].freq:=defaults[i].freq; //freq
             if csr[i]^.p4<>-2 then state2[i].vol:=csr[i]^.p4/32768 else state2[i].vol:=defaults[i].vol/32768; //vol
-            if csr[i]^.p5<>-2 then state2[i].len:=round(csr[i]^.p5*44.1) else state2[i].len:=round(44.1*defaults[i].len); //len
-            state2[i].normfreq:=state2[i].freq*norm44;
+            if csr[i]^.p5<>-2 then state2[i].len:=round(csr[i]^.p5*192) else state2[i].len:=round(192*defaults[i].len); //len
+            state2[i].normfreq:=state2[i].freq*norm192;
             state2[i].samplenum:=0;
             state2[i].spos:=0;
             state2[i].apos:=0;        // chyba niepotrzebnie
@@ -2785,7 +2787,7 @@ for k:=0 to (length div 4)-1 do
             if csr[i]^.p2<>-2 then
               begin
               p5:=csr[i]^.p2;
-              state2[i].gliss_dev:=0.001*norm44*csr[i]^.p2/44100;
+              state2[i].gliss_dev:=0.001*norm192*csr[i]^.p2/192000;
               state2[i].gliss_par2:=csr[i]^.p3;
               state2[i].gliss_time:=csr[i]^.p4;
               state2[i].gliss_df:=sqr(csr[i]^.p4/2000);
@@ -2803,7 +2805,7 @@ for k:=0 to (length div 4)-1 do
               begin
               vfreq:=1000/csr[i]^.p4;
               vstate[i].freq:=vfreq;
-              vstate[i].normfreq:=norm44*vfreq;
+              vstate[i].normfreq:=norm192*vfreq;
               end
             else vstate[i].freq:=0; //freq
 
@@ -2900,27 +2902,16 @@ end;
 
 procedure AudioCallback3(userdata:pointer; audio:PSDL_audiostream; length:longint; total:longint); cdecl;
 
-
+var data:PByte;
 
 begin
 if (length > 0) then
   begin
- // data:=SDL_stack_alloc(Uint8, additional_amount)
-{
-    /* Calculate a little more audio here, maybe using `userdata`, write it to `stream`
-     *
-     * If you want to use the original callback, you could do something like this:
-     */
-    if (additional_amount > 0) {
-        Uint8 *data = SDL_stack_alloc(Uint8, additional_amount);
-        if (data) {
-            MyAudioCallback(userdata, data, additional_amount);
-            SDL_PutAudioStreamData(stream, data, additional_amount);
-            SDL_stack_free(data);
-        }
-    }
-}
-end;
+  data:=@wavebuf;
+  AudioCallback(userdata, data, length);
+  SDL_PutAudioStreamData(stream, data, length);
+  form1.label8.caption:=inttostr(length);
+  end;
 end;
 
 //--------------------------MIDI Decoding---------------------------------------
@@ -3663,7 +3654,7 @@ if not SDL_Init(SDL_INIT_AUDIO) then
   end;
 
 
-spec.freq := 44100;                                     // sample rate
+spec.freq := 192000;                                     // sample rate
 spec.format := SDL_AUDIO_S16;                               // 16-bit samples
 spec.channels := 2;                                     // stereo
 
@@ -3689,7 +3680,7 @@ end;
 
 procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
-  if messagedlg('Really close program?', MtConfirmation,[MbYes,MbNo],0)=mryes then canclose:=true else canclose :=false;
+  if messagedlg('Close the program?', MtConfirmation,[MbYes,MbNo],0)=mryes then canclose:=true else canclose :=false;
 end;
 
 
@@ -4168,7 +4159,7 @@ end;
 
 procedure TForm1.FormActivate(Sender: TObject);
 begin
-  form1.caption:='Malina Softsynth '+ver;
+  form1.caption:='PC Softsynth 2 v.'+ver;
   DefaultFormatSettings.DecimalSeparator:='.';
 //  form1.synedit1.gutter.visible:=false;
 //  form1.synedit1.Gutter.autosize:=false;

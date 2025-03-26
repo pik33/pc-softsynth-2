@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 240
+  Left = 1235
   Height = 575
-  Top = 97
+  Top = 263
   Width = 923
   ActiveControl = BitBtn1
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'MalinaSoftsynth 0.07'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 575
+  ClientWidth = 923
   Position = poDesktopCenter
   LCLVersion = '4.0.0.3'
   OnActivate = FormActivate
@@ -961,6 +961,13 @@ object Form1: TForm1
     Width = 43
     Caption = 'Console'
     ParentColor = False
+  end
+  object Label8: TLabel
+    Left = 330
+    Height = 15
+    Top = 519
+    Width = 34
+    Caption = 'Label8'
   end
   object OpenDialog1: TOpenDialog
     Title = 'Load sample'

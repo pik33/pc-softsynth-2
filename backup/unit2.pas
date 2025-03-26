@@ -254,7 +254,8 @@ type
 
 var
   Form2: TForm2;
-  a,h,s:array[1..15] of integer;
+  h:array[1..31] of double;
+  a,s:array[1..31]of longint;
   chd:boolean=false;
   chd2:boolean=false;
   chg3:boolean=false;
@@ -288,7 +289,7 @@ for i:=0 to 1023 do spl[i]:=0;
 if form2.checkbox11.checked then
   begin
   // złóż falę z harmonicznych
-  for i:=1 to 15 do
+  for i:=1 to 31 do
     begin
     for j:=0 to 1023 do
       begin
@@ -488,11 +489,11 @@ procedure TForm2.BitBtn12Click(Sender: TObject);
 
 var maxi:double;
 i:integer;
-harm:array[1..30] of double;
+harm:array[1..63] of double;
 begin
   fft1.fft;
   maxi:=0;
-  for i:=1 to 30 do
+  for i:=1 to 63 do
     begin
     harm[i]:=sqrt(sqr(fft1.TransformedData[i].real)+sqr(fft1.transformeddata[i].imag));
     if harm[i]>maxi then maxi:=harm[i];
@@ -502,37 +503,37 @@ begin
     maxi:=1;
     harm[2]:=1
     end;
-  for i:=1 to 15 do h[i]:=round(100*(harm[2*i]/maxi));
-  edit1.Text:=inttostr(h[1]);
-  edit2.Text:=inttostr(h[2]);
-  edit3.Text:=inttostr(h[3]);
-  edit4.Text:=inttostr(h[4]);
-  edit5.Text:=inttostr(h[5]);
-  edit6.Text:=inttostr(h[6]);
-  edit7.Text:=inttostr(h[7]);
-  edit8.Text:=inttostr(h[8]);
-  edit9.Text:=inttostr(h[9]);
-  edit10.Text:=inttostr(h[10]);
-  edit11.Text:=inttostr(h[11]);
-  edit12.Text:=inttostr(h[12]);
-  edit19.Text:=inttostr(h[13]);
-  edit20.Text:=inttostr(h[14]);
-  edit21.Text:=inttostr(h[15]);
-  scrollbar1.position:=100-h[1];
-  scrollbar2.position:=100-h[2];
-  scrollbar3.position:=100-h[3];
-  scrollbar4.position:=100-h[4];
-  scrollbar5.position:=100-h[5];
-  scrollbar6.position:=100-h[6];
-  scrollbar7.position:=100-h[7];
-  scrollbar8.position:=100-h[8];
-  scrollbar9.position:=100-h[9];
-  scrollbar10.position:=100-h[10];
-  scrollbar11.position:=100-h[11];
-  scrollbar12.position:=100-h[12];
-  scrollbar19.position:=100-h[13];
-  scrollbar20.position:=100-h[14];
-  scrollbar21.position:=100-h[15];
+  for i:=1 to 31 do h[i]:=harm[2*i]/maxi;
+  edit1.Text:=inttostr(round(100*(h[1])));
+  edit2.Text:=inttostr(round(100*(h[2])));
+  edit3.Text:=inttostr(round(100*(h[3])));
+  edit4.Text:=inttostr(round(100*(h[4])));
+  edit5.Text:=inttostr(round(100*(h[5])));
+  edit6.Text:=inttostr(round(100*(h[6])));
+  edit7.Text:=inttostr(round(100*(h[7])));
+  edit8.Text:=inttostr(round(100*(h[8])));
+  edit9.Text:=inttostr(round(100*(h[9])));
+  edit10.Text:=inttostr(round(100*(h[10])));
+  edit11.Text:=inttostr(round(100*(h[11])));
+  edit12.Text:=inttostr(round(100*(h[12])));
+  edit19.Text:=inttostr(round(100*(h[13])));
+  edit20.Text:=inttostr(round(100*(h[14])));
+  edit21.Text:=inttostr(round(100*(h[15])));
+  scrollbar1.position:=100-round(100*h[1]);
+  scrollbar2.position:=100-round(100*h[2]);
+  scrollbar3.position:=100-round(100*h[3]);
+  scrollbar4.position:=100-round(100*h[4]);
+  scrollbar5.position:=100-round(100*h[5]);
+  scrollbar6.position:=100-round(100*h[6]);
+  scrollbar7.position:=100-round(100*h[7]);
+  scrollbar8.position:=100-round(100*h[8]);
+  scrollbar9.position:=100-round(100*h[9]);
+  scrollbar10.position:=100-round(100*h[10]);
+  scrollbar11.position:=100-round(100*h[11]);
+  scrollbar12.position:=100-round(100*h[12]);
+  scrollbar19.position:=100-round(100*h[13]);
+  scrollbar20.position:=100-round(100*h[14]);
+  scrollbar21.position:=100-round(100*h[15]);
   speedbutton3.down:=true;
   checkbox11.checked:=true;
   checkbox12.checked:=false;
@@ -1151,21 +1152,21 @@ end;
 
 procedure TForm2.ScrollBar10Change(Sender: TObject);
 begin
-  h[10]:=100-scrollbar10.position;
+  h[10]:=(100-scrollbar10.position)/100;
   if speedbutton3.Down then chd:=true;
   edit10.text:=inttostr(100-scrollbar10.position);
 end;
 
 procedure TForm2.ScrollBar11Change(Sender: TObject);
 begin
-    h[11]:=100-scrollbar11.position;
+    h[11]:=(100-scrollbar11.position)/100;
   if speedbutton3.Down then chd:=true;
   edit11.text:=inttostr(100-scrollbar11.position);
 end;
 
 procedure TForm2.ScrollBar12Change(Sender: TObject);
 begin
-  h[12]:=100-scrollbar12.position;
+  h[12]:=(100-scrollbar12.position)/100;
   if speedbutton3.Down then chd:=true;
   edit12.text:=inttostr(100-scrollbar12.position);
 end;
@@ -1218,21 +1219,21 @@ end;
 
 procedure TForm2.ScrollBar19Change(Sender: TObject);
 begin
-  h[13]:=100-scrollbar19.position;
+  h[13]:=(100-scrollbar19.position)/100;
   if speedbutton3.Down then begin chd:=true; end;
   edit19.text:=inttostr(100-scrollbar19.position);
 end;
 
 procedure TForm2.ScrollBar1Change(Sender: TObject);
 begin
-  h[1]:=100-scrollbar1.position;
+  h[1]:=(100-scrollbar1.position)/100;
   if speedbutton3.Down then begin chd:=true; end;
   edit1.text:=inttostr(100-scrollbar1.position);
 end;
 
 procedure TForm2.ScrollBar20Change(Sender: TObject);
 begin
-   h[14]:=100-scrollbar20.position;
+   h[14]:=(100-scrollbar20.position)/100;
   if speedbutton3.Down then begin chd:=true; end;
   edit20.text:=inttostr(100-scrollbar20.position);
 
@@ -1240,7 +1241,7 @@ end;
 
 procedure TForm2.ScrollBar21Change(Sender: TObject);
 begin
-  h[15]:=100-scrollbar21.position;
+  h[15]:=(100-scrollbar21.position)/100;
   if speedbutton3.Down then begin chd:=true; end;
   edit21.text:=inttostr(100-scrollbar21.position);
 
@@ -1290,56 +1291,56 @@ end;
 
 procedure TForm2.ScrollBar2Change(Sender: TObject);
 begin
-   h[2]:=100-scrollbar2.position;
+   h[2]:=(100-scrollbar2.position)/100;
   if speedbutton3.Down then chd:=true;
   edit2.text:=inttostr(100-scrollbar2.position);
 end;
 
 procedure TForm2.ScrollBar3Change(Sender: TObject);
 begin
-   h[3]:=100-scrollbar3.position;
+   h[3]:=(100-scrollbar3.position)/100;
   if speedbutton3.Down then chd:=true;
   edit3.text:=inttostr(100-scrollbar3.position);
 end;
 
 procedure TForm2.ScrollBar4Change(Sender: TObject);
 begin
-   h[4]:=100-scrollbar4.position;
+   h[4]:=(100-scrollbar4.position)/100;
   if speedbutton3.Down then chd:=true;
   edit4.text:=inttostr(100-scrollbar4.position);
 end;
 
 procedure TForm2.ScrollBar5Change(Sender: TObject);
 begin
-  h[5]:=100-scrollbar5.position;
+  h[5]:=(100-scrollbar5.position)/100;
   if speedbutton3.Down then chd:=true;
   edit5.text:=inttostr(100-scrollbar5.position);
 end;
 
 procedure TForm2.ScrollBar6Change(Sender: TObject);
 begin
-  h[6]:=100-scrollbar6.position;
+  h[6]:=(100-scrollbar6.position)/100;
   if speedbutton3.Down then chd:=true;
   edit6.text:=inttostr(100-scrollbar6.position);
 end;
 
 procedure TForm2.ScrollBar7Change(Sender: TObject);
 begin
-  h[7]:=100-scrollbar7.position;
+  h[7]:=(100-scrollbar7.position)/100;
   if speedbutton3.Down then chd:=true;
   edit7.text:=inttostr(100-scrollbar7.position);
 end;
 
 procedure TForm2.ScrollBar8Change(Sender: TObject);
 begin
-  h[8]:=100-scrollbar8.position;
+  h[8]:=(100-scrollbar8.position)/100;
   if speedbutton3.Down then chd:=true;
   edit8.text:=inttostr(100-scrollbar8.position);
 end;
 
 procedure TForm2.ScrollBar9Change(Sender: TObject);
 begin
-  h[9]:=100-scrollbar9.position;
+  h[9]:=(100-scrollbar9.position)/100;
   if speedbutton3.Down then chd:=true;
   edit9.text:=inttostr(100-scrollbar9.position);
 end;

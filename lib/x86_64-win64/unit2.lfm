@@ -5,8 +5,8 @@ object Form2: TForm2
   Width = 1356
   ActiveControl = CheckBox1
   Caption = 'Wave editor'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 656
+  ClientWidth = 1356
   Position = poDesktopCenter
   LCLVersion = '4.0.0.3'
   OnClose = FormClose
@@ -872,7 +872,7 @@ object Form2: TForm2
     Left = 668
     Height = 25
     Hint = 'Smooth wave by filtering harmonics'#10'higher than 16th'
-    Top = 265
+    Top = 267
     Width = 103
     Caption = 'Smooth'
     Font.Height = -10
