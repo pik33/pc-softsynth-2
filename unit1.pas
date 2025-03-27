@@ -106,7 +106,7 @@ type
 
   const maxchannel=32;
         maxdefs=1024;
-        buflen=960000;
+        buflen=9600;
         ver='1.91 alpha-20250324 build 151';
 
   type
@@ -290,6 +290,8 @@ var
   stream:PSDL_AudioStream;
 
   wavebuf:array[0..buflen-1] of byte;
+  window: PSDL_Window;
+  renderer: PSDL_Renderer;
 
 procedure starttrack;
 procedure endtrack(time:integer);
@@ -3642,17 +3644,26 @@ function sdl_sound_init:integer;
 
 // Zainicjuj bibliotekę sdl_sound
 
-
+ var WindowSize: TSDL_Point = (x: 1024; y: 600);
 
 begin
 Result:=0;
 
-if not SDL_Init(SDL_INIT_AUDIO) then
+if not SDL_Init(SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_EVENTS) then
   begin
   Result:=-1; // sdl_audio nie da się zainicjować
   exit;
   end;
 
+window := SDL_CreateWindow('SDL3 Window', WindowSize.x, WindowSize.y, SDL_WINDOW_RESIZABLE);
+if window = nil then begin
+  SDL_Log('Kann kein Window erzeugen !   %s', SDL_GetError);
+end;
+
+renderer := SDL_CreateRenderer(window, nil);
+if renderer = nil then begin
+  SDL_Log('Kann kein SDL-Renderer erzeugen !   %s', SDL_GetError);
+end;
 
 spec.freq := 192000;                                     // sample rate
 spec.format := SDL_AUDIO_S16;                               // 16-bit samples

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 1235
+  Left = 383
   Height = 575
-  Top = 263
+  Top = 756
   Width = 923
   ActiveControl = BitBtn1
   BorderIcons = [biSystemMenu, biMinimize]
