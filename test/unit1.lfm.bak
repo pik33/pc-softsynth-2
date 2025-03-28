@@ -1,0 +1,58 @@
+object Form1: TForm1
+  Left = 470
+  Height = 303
+  Top = 145
+  Width = 533
+  Caption = 'Form1'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  LCLVersion = '1.6.0.4'
+  object fft1: TDSXFastFourier
+    OnGetData = fft1GetData
+    NumSamples = 524288
+    left = 16
+    top = 16
+  end
+  object fft2: TDSXFastFourier
+    OnGetData = fft2GetData
+    NumSamples = 16384
+    left = 48
+    top = 16
+  end
+  object fft3: TDSXFastFourier
+    OnGetData = fft3GetData
+    NumSamples = 131072
+    left = 80
+    top = 16
+  end
+  object fft4: TDSXFastFourier
+    OnGetData = fft4GetData
+    NumSamples = 524288
+    left = 112
+    top = 16
+  end
+  object fft5: TDSXFastFourier
+    OnGetData = fft5GetData
+    NumSamples = 4194304
+    left = 144
+    top = 16
+  end
+  object fft6: TDSXFastFourier
+    OnGetData = fft6GetData
+    NumSamples = 32768
+    left = 176
+    top = 16
+  end
+  object fft7: TDSXFastFourier
+    OnGetData = fft7GetData
+    NumSamples = 262144
+    left = 120
+    top = 66
+  end
+  object fft8: TDSXFastFourier
+    OnGetData = fft8GetData
+    NumSamples = 65536
+    left = 168
+    top = 72
+  end
+end

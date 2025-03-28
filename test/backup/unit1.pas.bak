@@ -1,0 +1,1755 @@
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, umain, retro, sdl2, fft, math, modplug, windows;
+const scaler=1.0045073642544625156647946943413;
+      fft441=0.08411407470703125;
+      const rld=1.0072464122237038980903435690978;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    CheckBox1: TCheckBox;
+    fft2: TDSXFastFourier;
+    fft3: TDSXFastFourier;
+    fft4: TDSXFastFourier;
+    fft1: TDSXFastFourier;
+    Image1: TImage;
+    Image2: TImage;
+    Image3: TImage;
+    Memo1: TMemo;
+    OpenDialog1: TOpenDialog;
+    RadioButton1: TRadioButton;
+    RadioButton2: TRadioButton;
+    RadioButton3: TRadioButton;
+    RadioButton4: TRadioButton;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure fft1GetData(index: integer; var Value: TComplex);
+    procedure fft2GetData(index: integer; var Value: TComplex);
+    procedure fft3GetData(index: integer; var Value: TComplex);
+    procedure fft4GetData(index: integer; var Value: TComplex);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate(Sender: TObject);
+
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end;
+
+  freqs1=record
+    time:integer;
+    freq,ampl,phs:double;
+    end;
+
+  haars1=record
+    time,freq:integer;
+    ampl:double;
+    end;
+
+  ffreqs1=file of freqs1;
+  fhaars1=file of haars1;
+
+
+  bmppixel=array[0..2] of byte;
+  filedesc=array[0..1000,0..1] of string;
+var
+  Form1: TForm1;
+  wavebuf: array[0..2*16777216] of smallint;
+  wavebuf2:array[0..16777216] of integer;
+  fftbuf2,fftbuf:array[0..1048576] of double;
+  fftpos,fftpos1,fftpos2,s1,z1:integer;
+  fftval,dfreq,oldfreq,freq,maxi,mini:double;
+  idx,cc,kk:integer;
+  currentdir,currentdir2:string;
+
+  bmpi:integer;
+  bmpp:bmppixel absolute bmpi;
+  b:byte;
+  bmpbuf:array[0..2500000] of bmppixel;
+  temp:cbutton;
+
+  sr:tsearchrec;
+
+      wb2:array[0..2*1921000] of smallint;
+    wb2i:array[0..1921000] of integer;
+    freqtable:array[-24..1100] of double;
+    intfreqtable:array[-24..1100] of integer;
+ testsignals,testsignalc:array[0..959999] of double;
+     filebuf:array[0..50000000] of smallint;
+     ffilebuf:array[0..50000000] of double;
+        buf2:array[0..1048575] of double;
+
+implementation
+
+procedure spectrum(filename:string;start,zakres,c:integer;overwrite:boolean); forward;
+procedure waveform(filename:string;c:integer); forward;
+procedure waveform10(filename:string;c:integer); forward;
+procedure anal1(filename:string); forward;
+procedure anal3(filename:string); forward;
+procedure anal2(filename:string); forward;
+procedure synt1; forward;
+procedure getmax; forward;
+procedure plotcomps;forward;
+procedure haar(f:string); forward;
+
+{$R *.lfm}
+
+{ TForm1 }
+
+procedure TForm1.Button1Click(Sender: TObject);
+
+var s:string;
+
+    filenames:filedesc;
+
+    k,l,i,j,ilf,ild,ild2,ild3:integer;
+    sel:integer=0;
+    selstart:integer=0;
+    buf,buf2:array[0..44] of  byte;
+    b:byte;
+    bmpbuf:array[0..2500000] of bmppixel;
+    mx,my,cl,st,za:integer;
+
+begin
+
+
+
+ilf:=0;
+currentdir2:=getcurrentdir;
+
+
+currentdir:=currentdir2+'\dmp\*.*';
+if findfirst(currentdir,fadirectory,sr)=0 then
+  repeat
+  if (sr.attr and faDirectory) = faDirectory then
+    begin
+    filenames[ilf,0]:=sr.name;
+    filenames[ilf,1]:='    [DIR]';
+    ilf+=1;
+    end;
+  until (findnext(sr)<>0) or (ilf=1000);
+  sysutils.findclose(sr);
+
+currentdir:=currentdir2+'\dmp\*.wav';
+
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+    filenames[ilf,0]:=sr.name;
+    filenames[ilf,1]:=inttostr(sr.size);
+
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
+currentdir2:=currentdir2+'\dmp\';
+
+songtime:=0;
+pause:=false;
+siddelay:=20000;
+
+initmachine(0); //---------- Start the retromachine -------------------
+poke($70002,0);
+application.processmessages;
+
+main1;
+
+
+
+if ilf<26 then ild:=ilf else ild:=26;
+fs.box(2,6,432,16,232);
+for i:=0 to ild do
+  begin
+  l:=length(filenames[i])-4;
+  s:=filenames[i,0];
+  for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+  s:=copy(s,1,44);
+  if i>0 then fs.outtextxy(8,6+16*i,s,130) else fs.outtextxy(8,6+16*i,s,130);
+  s:=filenames[i,1];
+  if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+  if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+  if i>0 then fs.outtextxy(336,6+16*i,s,130) else fs.outtextxy(336,6+16*i,s,130);
+  end;
+application.processmessages;
+poke($70003,1);
+poke($70004,1);
+poke($70005,1);
+poke ($70001,1);
+
+//cls(0);
+//line2(200,200,201,300,40);
+//line2(201,300,202,200,40);
+//wait(10000);
+repeat
+
+  fuck:=currentdir2;
+  main2 ;
+
+    mx:=dpeek($6002c)-64; my:=dpeek($6002e)-40;
+
+    if (peek($60030)=1) and (mx>fs.x+2) and (mx<fs.x+442) and (my>fs.y+30) and (my<fs.y+438) then
+      begin
+//      poke($60030,0);
+      i:=(my-30-fs.y) div 16;
+      fs.box(2,6+16*sel,432,16,141);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+      sel:=i;
+      fs.box(2,6+16*sel,432,16,232);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+      if peek($60033)=2 then begin poke($60030,0); poke($60028,13); end;
+      end;
+
+    repeat wait(1) until not fs.checkmouse;
+
+if (peek($60028)=13) and (filenames[sel+selstart,1]='    [DIR]') then
+  begin
+  poke($60028,0);
+  s:=filenames[sel+selstart,0] ;
+  setcurrentdir(currentdir2+s);
+  currentdir2:=getcurrentdir+'\';
+
+  ilf:=0;
+  selstart:=0; sel:=0;
+  currentdir:=currentdir2+'*.*';
+  if findfirst(currentdir,fadirectory,sr)=0 then
+    repeat
+    if (sr.attr and faDirectory) = faDirectory then
+      begin
+      filenames[ilf,0]:=sr.name;
+      filenames[ilf,1]:='    [DIR]';
+      ilf+=1;
+      end;
+
+     until (findnext(sr)<>0) or (ilf=1000);
+    sysutils.findclose(sr);
+
+  currentdir:=currentdir2+'*.wav';
+
+  if findfirst(currentdir,faAnyFile,sr)=0 then
+    repeat
+      filenames[ilf,0]:=sr.name;
+      filenames[ilf,1]:=inttostr(sr.size);
+
+    ilf+=1;
+
+    until (findnext(sr)<>0) or (ilf=1000);
+    sysutils.findclose(sr);
+    ilf-=1;
+  fs.cls;
+  if ilf<26 then ild:=ilf else ild:=26;
+  fs.box(2,6+16*sel,432,16,232);
+  for i:=0 to ild do
+  begin
+  l:=length(filenames[i])-4;
+  s:=filenames[i,0];
+  for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+  s:=copy(s,1,40);
+  if i>0 then fs.outtextxy(8,6+16*i,s,130) else fs.outtextxy(8,6+16*i,s,130);
+  s:=filenames[i,1];
+  if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+  if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+  if i>0 then fs.outtextxy(336,6+16*i,s,130) else fs.outtextxy(336,6+16*i,s,130);
+  end;
+end;
+
+if sls.checkmouse then sls.highlight else sls.unhighlight;
+if sls.checkmouse and (peek($60030)=1) then
+   begin
+   poke($60030,0);
+   blit($F000000,0,0,$F800000,0,0,1792,1120,1792,1792);
+   box(0,0,1792,1120,15);
+   outtextxyz(16,16,'Nothing to show',0,2,2);
+   if (peek($81002)<>0) then blit($E000000,0,0,$f000000,0,0,1792,1120,1792,1792);
+   outtextxyz(16,1080,'(Ready - Press any key or mouse button to return)',0,2,2);
+   repeat application.processmessages until (peek($60028)<>0) or (peek($60030)<>0);
+   blit($F800000,0,0,$F000000,0,0,1792,1120,1792,1792);
+   poke($60030,0); poke($60028,0);
+   end;
+
+  if stb.checkmouse then stb.highlight else stb.unhighlight;
+if (stb.checkmouse and (peek($60030)=1)) then if filenames[sel+selstart,1]<>'    [DIR]' then
+  begin
+  plb.unselect;
+  poke($82000,1);
+  repeat until peek($82000)=0;
+  poke($82000,2);
+  poke($60030,0);
+  end;
+
+
+plb.checkall;
+
+if (plb.clicked=1) or (peek($60028)=13) then if filenames[sel+selstart,1]<>'    [DIR]' then
+  begin
+  plb.clicked:=0;
+  poke($82000,1);
+  repeat until peek($82000)=0;
+  poke($82000,2);
+  poke($60030,0);
+  lpoke($60028,0);
+  if fh>-1 then fileclose(fh);
+  plb.highlight;
+  plb.select;
+  plb.highlight;
+  fh:=fileopen(currentdir2+filenames[sel+selstart,0],$40);
+  fileread(fh,buf2,44);
+  end;
+if fh=-1 then plb.unselect;
+
+over.checkall;
+start.checkall;
+range.checkall;
+scolor.checkall;
+sbutton.checkall;
+wbutton.checkall;
+wbutton10.checkall;
+anal.checkall;
+synt.checkall;
+gm.checkall;
+psk.checkall;
+haaar.checkall;
+
+
+if anal.clicked=1 then begin anal2(currentdir2+filenames[sel+selstart,0]); anal.unselect; anal.clicked:=0; end;
+if haaar.clicked=1 then begin haar(currentdir2+filenames[sel+selstart,0]); haaar.unselect; haaar.clicked:=0; end;
+if synt.clicked=1 then begin synt1; synt.unselect; synt.clicked:=0; end;
+if gm.clicked=1 then begin getmax; gm.unselect; gm.clicked:=0; end;
+if psk.clicked=1 then begin plotcomps; psk.unselect; psk.clicked:=0; end;
+
+
+if wbutton10.clicked=1 then
+  begin
+  wbutton10.clicked:=0 ;
+  wbutton10.unselect;
+  poke($60030,0);
+  poke($60028,0);
+
+  temp:=scolor.findselected;
+  if temp<>nil then cl:=temp.value;
+  if filenames[sel+selstart,1]<>'    [DIR]' then waveform10(currentdir2+filenames[sel+selstart,0],cl)
+  else begin
+     blit($F000000,448,280,$FF00000,0,0,896,560,1792,896);
+     box(592,552,640,80,15);
+     outtextxyz(600,560,'Cannot plot a waveform of a directory.',0,2,2);
+     outtextxyz(600,592,'Press any key.',0,2,2);
+     repeat application.processmessages until peek($60028)<>0;
+     poke($60028,0);
+     blit($FF00000,0,0,$F000000,448,280,896,560,896,1792);
+     end;
+  end;
+
+if wbutton.clicked=1 then
+  begin
+  wbutton.clicked:=0 ;
+  wbutton.unselect;
+  poke($60030,0);
+  poke($60028,0);
+  temp:=scolor.findselected;
+  if temp<>nil then cl:=temp.value;
+  if filenames[sel+selstart,1]<>'    [DIR]' then waveform(currentdir2+filenames[sel+selstart,0],cl)
+  else begin
+     blit($F000000,448,280,$FF00000,0,0,896,560,1792,896);
+     box(592,552,640,80,15);
+     outtextxyz(600,560,'Cannot plot a waveform of a directory.',0,2,2);
+     outtextxyz(600,592,'Press any key.',0,2,2);
+     repeat application.processmessages until peek($60028)<>0;
+     poke($60028,0);
+     blit($FF00000,0,0,$F000000,448,280,896,560,896,1792);
+     end;
+  end;
+
+//if sbutton.checkmouse then sbutton.highlight else sbutton.unhighlight;
+//if (sbutton.checkmouse and (peek($60030)=1))  then
+if sbutton.clicked=1 then
+      begin
+      sbutton.clicked:=0 ;
+      sbutton.unselect;
+      temp:=scolor.findselected;
+      if temp<>nil then cl:=temp.value;
+      temp:=start.findselected;
+      if temp<>nil then st:=temp.value;
+      temp:=range.findselected;
+      if temp<>nil then za:=temp.value;
+      poke($60030,0);
+      poke($60028,0);
+      if filenames[sel+selstart,1]<>'    [DIR]' then spectrum(currentdir2+filenames[sel+selstart,0],st,za,cl,over.selected)
+      else begin
+         blit($F000000,448,280,$FF00000,0,0,896,560,1792,896);
+         box(592,552,640,80,15);
+         outtextxyz(600,560,'Cannot plot a spectrum of a directory.',0,2,2);
+         outtextxyz(600,592,'Press any key.',0,2,2);
+         repeat application.processmessages until peek($60028)<>0;
+         poke($60028,0);
+         blit($FF00000,0,0,$F000000,448,280,896,560,896,1792);
+         end;
+      end;
+
+
+
+
+  if peek($60028)=ord('5') then begin poke ($60028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
+  if peek($60028)=ord('1') then begin poke ($60028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
+  if peek($60028)=ord('2') then begin poke ($60028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
+  if peek($60028)=ord('3') then begin poke ($60028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
+  if peek($60028)=ord('4') then begin poke ($60028,0); siddelay:=5000; songfreq:=400;skip:=1; end;
+  if peek($60028)=ord('p') then begin poke ($60028,0); pause:=not pause; end;
+  if dpeek($60028)=16442 then begin dpoke($60028,0); if peek($70003)=0 then poke ($70003,1) else poke ($70003,0); end;
+  if dpeek($60028)=16443 then begin dpoke($60028,0); if peek($70004)=0 then poke ($70004,1) else poke ($70004,0); end;
+  if dpeek($60028)=16444 then begin dpoke($60028,0); if peek($70005)=0 then poke ($70005,1) else poke ($70005,0); end;
+
+  if (dpeek($60028)=16465) or (peek($60031)=255) then
+    begin
+    dpoke($60028,0);
+    poke($60031,0);
+    if sel<ild then
+      begin
+      fs.box(2,6+16*sel,432,16,141);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+      sel+=1;
+      fs.box(2,6+16*sel,432,16,232);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+
+      end
+    else if sel+selstart<ilf-1 then
+      begin
+      selstart+=1;
+      fs.cls;
+      fs.box(2,6+16*sel,432,16,232);
+      for i:=0 to ild do
+        begin
+        l:=length(filenames[i+selstart,0])-4;
+        if l>36 then s:=copy (filenames[i+selstart,0],1,40) else s:= filenames[i+selstart,0]  ;
+        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+        if i<ild then fs.outtextxy(8,6+16*i,s,130) else  fs.outtextxy(8,6+16*i,s,130);
+        s:=filenames[i+selstart,1];
+        if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+        if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+        if i<ild then fs.outtextxy(336,6+16*i,s,130) else fs.outtextxy(336,6+16*i,s,130);
+        end;
+      end;
+    end;
+
+  if (dpeek($60028)=16466) or (peek($60031)=1) then
+    begin
+    dpoke($60028,0);
+    poke($60031,0);
+    if sel>0 then
+      begin
+      fs.box(2,6+16*sel,432,16,141);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else  s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+      sel-=1;
+      fs.box(2,6+16*sel,432,16,232);
+      l:=length(filenames[sel+selstart,0])-4;
+      if l>36 then s:=copy(filenames[sel+selstart,0],1,40) else s:=filenames[sel+selstart,0];
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      fs.outtextxy(8,6+16*sel,s,130);
+      s:=filenames[sel+selstart,1];
+      if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+      if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+      fs.outtextxy(336,6+16*sel,s,130);
+
+
+      end
+    else if sel+selstart>0 then
+      begin
+      selstart-=1;
+      fs.cls;
+      fs.box(2,6+16*sel,432,16,232);
+      for i:=0 to ild do
+        begin
+        l:=length(filenames[i+selstart,0])-4;
+        if l>36 then s:=copy (filenames[i+selstart,0],1,40) else s:= filenames[i+selstart,0]  ;
+        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+        if i>0 then fs.outtextxy(8,6+16*i,s,130) else  fs.outtextxy(8,6+16*i,s,130);
+        s:=filenames[i+selstart,1];
+        if s<>'    [DIR]' then if length(s)<9 then for j:=9 downto length(s)+1 do s:=' '+s;
+        if s<>'    [DIR]' then s:=copy(s,1,3)+' '+copy(s,4,3)+' '+copy(s,7,3);
+        if i>0 then fs.outtextxy(336,6+16*i,s,130) else fs.outtextxy(336,6+16*i,s,130);
+        end;
+      end;
+
+
+    end;
+
+  if peek($60028)=ord('i') then begin poke ($60028,0); poke($70001, peek($70001) xor 1); end;
+
+  if (peek($60028)=ord('f')) and (peek($70002)=0) then
+    begin
+    poke($60028,0);
+    repeat until peek($70000)=1;
+    poke ($70000,2);
+    SDL_DestroyTexture( sdlTexture );
+    SDL_DestroyRenderer( sdlRenderer );
+    poke($70002,1);
+    sdl_setwindowfullscreen(scr,sdl_window_fullscreen_desktop);
+    sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
+    sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
+    SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
+    poke ($70000,1);
+    end;
+
+  if (needrestart=1) then
+    begin
+    needrestart:=0;
+    repeat until peek($70000)=1;
+    poke ($70000,2);
+    SDL_DestroyTexture( sdlTexture );
+    SDL_DestroyRenderer( sdlRenderer );
+    sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
+    sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
+    SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
+    poke ($70000,1);
+    end;
+
+
+  if (peek($60028)=ord('f')) and (peek($70002)=1) then
+    begin
+    poke($60028,0);
+    repeat until peek($70000)=1;
+    poke ($70000,2);
+    SDL_DestroyTexture( sdlTexture );
+    SDL_DestroyRenderer( sdlRenderer );
+    poke($70002,0);
+    sdl_setwindowfullscreen(scr,0);
+    sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
+    sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
+    SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
+    poke ($70000,1);
+    end;
+//repeat wait(1) until not fs.checkmouse;
+  poke($60030,0);
+//   lpoke($60028,0);
+
+  application.processmessages;
+  wvbl;
+  fs.redrawclient;
+  fs.drawdecoration;
+//  plot.redrawclient;
+until ((peek($6002b)<>0) and (peek($60028)=27)) or (needclose=1) ;
+timer1:=-1;
+fileclose(fh);
+stopmachine;
+halt;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.fft1GetData(index: integer; var Value: TComplex);
+begin
+
+  value.real:=wavebuf2[index];
+  value.imag:=0;
+
+
+end;
+
+
+procedure TForm1.fft2GetData(index: integer; var Value: TComplex);
+begin
+
+  value.real:=buf2[index];
+  value.imag:=0;
+
+
+end;
+procedure TForm1.fft3GetData(index: integer; var Value: TComplex);
+begin
+
+  value.real:=buf2[index];
+  value.imag:=0;
+
+
+end;
+procedure TForm1.fft4GetData(index: integer; var Value: TComplex);
+begin
+
+  value.real:=buf2[index];
+  value.imag:=0;
+
+
+end;
+procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+ closeaction:=cafree;
+end;
+
+
+//---------------------- Form create -------------------------------------
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
+procedure TForm1.FormCreate(Sender: TObject);
+var intfreq,fh,fh2,i,j,c:integer;
+    freq,sin2:double;
+    infile1:ffreqs1;
+    temprec:freqs1;
+
+begin
+for i:=0 to 959999 do
+  begin
+ // sin2:=sqr(sin(pi*i/960000));
+  testsignals[i]:=sin(2*i*pi/960000);//*sin2;
+  testsignalc[i]:=cos(2*pi*i/960000);//*sin2;
+  end;
+ {
+fh:=fileopen('.\atari800.pal',$40);
+fh2:=filecreate('.\atari800.def');
+
+for i:=0 to 255 do
+  begin
+  c:=0;
+  fileread(fh,c,3);
+  c:=(c and 255) shl 16 + (c and $FF00) + c shr 16;
+  filewrite(fh2,c,4);
+  end;
+fileclose(fh);
+fileclose(fh2);
+  }
+// last freq=20056->20000;
+// delta=1/8 of semitone
+// a4=440 Hz= 494
+//35=16 Hz, 966=20 kHz; nfreqs=931;
+freq:=12.4280356528781;
+for i:=0 to 1023 do
+  begin
+  intfreq:=round(960000/freq);
+  freqtable[i]:=960000/intfreq;
+  intfreqtable[i]:=intfreq;
+  freq*=rld;
+  end;
+  freqtable[1024]:=0;
+
+for i:=0 to 1023 do
+  begin
+  while (freqtable[i+1]=freqtable[i]) and (freqtable[i]<>0) do
+    for j:=i to 1023  do begin freqtable[j]:=freqtable[j+1]; intfreqtable[j]:=intfreqtable[j+1]; end;
+  end;
+
+//assignfile(infile1,'d:\outfile.med');
+//reset(infile1);
+//memo1.lines.clear;
+//repeat
+ // read(infile1,temprec);
+ // if (temprec.freq>498) and (temprec.freq<502) then
+
+  //   form1.memo1.lines.add(floattostr(temprec.ampl)+' '+floattostr(temprec.phs)+' '+floattostr(temprec.freq)+' '+inttostr(temprec.time));
+  //until eof(infile1);
+button1.click;
+end;
+
+procedure spectrum(filename:string;start,zakres,c:integer;overwrite:boolean);
+
+
+var fh:integer;
+    buf:array[0..255] of integer;
+    songname:string;
+begin
+
+blit($F000000,0,0,$F800000,0,0,1792,1120,1792,1792);
+box(0,0,1792,1120,15);
+outtextxyz(8,8,'Please wait, calculating...',0,2,2);
+poke($60028,0);
+fh:=fileopen(filename,$40);
+songname:=copy(filename,1,length(filename)-4);
+fileread(fh,buf,44);
+for i:=0 to 524287 do fftbuf[i]:=0;
+
+for kk:=1 to 10 do begin
+application.processmessages;
+for i:=0 to 1048575 do wavebuf[i]:=0;
+fileread(fh,wavebuf,524288*4);
+fileseek(fh,kk*65536,fsfrombeginning);
+for i:=0 to 524287 do wavebuf2[i]:=wavebuf[2*i]+wavebuf[2*i+1];
+for i:=0 to 524287 do wavebuf2[i]:=round(sin(2*pi*i/524288)*sin(2*pi*i/524288)*wavebuf2[i]*2);
+application.processmessages;
+form1.fft1.fft;
+application.processmessages;
+for i:=0 to 262143 do fftbuf[i]+=sqrt(sqr(form1.fft1.transformeddata[i].real)+sqr(form1.fft1.transformeddata[i].imag))/(2*21474836480);
+application.processmessages;
+end;
+
+maxi:=0;
+for i:=0 to 262143 do if fftbuf[i]>maxi then maxi:=fftbuf[i];
+freq:=20;
+oldfreq:=20;
+for i:=1 to 1536 do
+  begin
+  oldfreq:=freq;
+  freq:=freq*scaler;
+  dfreq:=(freq-oldfreq)/2;
+  fftpos:=round(freq/fft441);
+  fftpos1:=round((freq-dfreq)/fft441);
+  fftpos2:=round((freq+dfreq)/fft441);
+  fftval:=0;
+//  for j:=fftpos1 to fftpos2 do fftval+=fftbuf[fftpos];
+ for j:=fftpos1 to fftpos2 do if fftbuf[j]>fftval then fftval:=fftbuf[j];
+//  fftval/=(fftpos2-fftpos1+1);
+//  fftval:=0.01;
+if fftval=0 then fftval:=0.001;
+  fftbuf2[i]:=20*log10(fftval);
+  end;
+
+mini:=99e99;
+maxi:=-99e99;
+for i:=1 to 1536 do if fftbuf2[i]<mini then mini:=fftbuf2[i];
+for i:=1 to 1536 do if fftbuf2[i]>maxi then maxi:=fftbuf2[i];
+z1:=round(maxi-mini);//+6;
+s1:=round(mini);
+if start=0 then start:=s1 else start:=-start;
+if zakres=0 then zakres:=z1;
+if overwrite and (peek($81000)>0) then start:=-peek($81000);
+if overwrite and (peek($81001)>0) then zakres:=peek($81001);
+
+if not overwrite or (peek($81002)=0) then uklad(start,zakres) else blit($E000000,0,0,$f000000,0,0,1792,1120,1792,1792);
+// for i:=1 to 768 do line2(192+2*i,10,193+2*i+1,500,40  );
+
+for i:=1 to 1534 do
+uplot(start,zakres,i,fftbuf2[i],fftbuf2[i+1],c);
+u2(start,zakres);
+fileclose(fh);
+fh:=filecreate(songname+'_fft.bmp');
+for i:=0 to 53 do
+  begin
+  b:=peek($80000+i);
+  filewrite(fh,b,1);
+  end;
+k:=0;
+for i:=1119 downto 0 do
+  for j:=0 to 1791 do
+   begin
+   idx:=dpeek($F000000+2*(1792*i+j));
+   bmpi:=lpeek($10000+4*idx);
+   bmpbuf[k]:=bmpp;
+   k+=1;
+   end;
+filewrite(fh,bmpbuf,6021120);
+fileclose (fh);
+fh:=-1;
+outtextxyz(16,1080,'(Ready - Press any key or mouse button to return)',0,2,2);
+repeat application.processmessages until (peek($60028)<>0) or (peek($60030)<>0);
+poke($60028,0);
+poke($60030,0);
+poke($81000,-start);
+poke($81001,zakres);
+poke($81002,1);
+blit($F000000,0,0,$E000000,0,0,1792,1120,1792,1792);
+blit($F800000,0,0,$F000000,0,0,1792,1120,1792,1792);
+
+
+end;
+
+procedure waveform(filename:string;c:integer);
+
+
+var fh:integer;
+    buf:array[0..255] of integer;
+    songname:string;
+    x,pixel,pixel2:integer;
+
+begin
+
+
+blit($F000000,0,0,$FC00000,0,0,1792,1120,1792,1792);
+box(0,0,1792,1120,15);
+outtextxyz(8,8,'Please wait, calculating...',0,2,2);
+poke($60028,0);
+fh:=fileopen(filename,$40);
+songname:=copy(filename,1,length(filename)-4);
+fileread(fh,buf,44);
+application.processmessages;
+fileread(fh,wavebuf,131071*4);
+fileclose(fh);
+for i:=0 to 131071 do wavebuf2[i]:=wavebuf[2*i]+wavebuf[2*i+1];
+application.processmessages;
+
+uklad2;
+for x:=1 to 1536 do
+
+begin
+pixel:=(wavebuf2[x]*960) div 131072;
+pixel2:=(wavebuf2[x+1]*960) div 131072;
+
+line2(191+x,992-pixel-480,192+x,992-pixel2-480,c);
+line2(192+x,992-pixel-480,193+x,992-pixel2-480,c);
+line2(191+x,993-pixel-480,192+x,993-pixel2-480,c);
+line2(192+x,993-pixel-480,193+x,993-pixel2-480,c);
+end;
+
+fh:=filecreate(songname+'_waveform.bmp');
+for i:=0 to 53 do
+  begin
+  b:=peek($80000+i);
+  filewrite(fh,b,1);
+  end;
+k:=0;
+for i:=1119 downto 0 do
+  for j:=0 to 1791 do
+   begin
+   idx:=dpeek($F000000+2*(1792*i+j));
+   bmpi:=lpeek($10000+4*idx);
+   bmpbuf[k]:=bmpp;
+   k+=1;
+   end;
+filewrite(fh,bmpbuf,6021120);
+fileclose (fh);
+fh:=-1;
+
+outtextxyz(16,1080,'(Ready - Press any key or mouse button to return)',0,2,2);
+repeat application.processmessages until (peek($60028)<>0) or (peek($60030)<>0);
+
+blit($F000000,0,0,$E400000,0,0,1792,1120,1792,1792);
+blit($FC00000,0,0,$F000000,0,0,1792,1120,1792,1792);
+
+end;
+
+procedure waveform10(filename:string;c:integer);
+
+
+var fh:integer;
+    buf:array[0..255] of integer;
+    songname:string;
+    oldx,x,pixel,pixel2:integer;
+
+
+
+
+
+    begin
+
+
+blit($F000000,0,0,$FC00000,0,0,1792,1120,1792,1792);
+box(0,0,1792,1120,15);
+outtextxyz(8,8,'Please wait, calculating...',0,2,2);
+poke($60028,0);
+fh:=fileopen(filename,$40);
+songname:=copy(filename,1,length(filename)-4);
+fileread(fh,buf,44);
+application.processmessages;
+fileread(fh,wb2,1921000*4);
+fileclose(fh);
+for i:=0 to 1921000 do wb2i[i]:=wb2[2*i]+wb2[2*i+1];
+application.processmessages;
+
+uklad3;
+oldx:=1;
+for x:=0 to 1535 do
+  for j:=0 to 1249 do
+   begin
+   pixel:=(wb2i[x*1250+j]*960) div 131072;
+   pixel2:=(wb2i[x*1250+j+1]*960) div 131072;
+
+line2(191+oldx,992-pixel-480,191+x,992-pixel2-480,c);
+//line2(192+x,992-pixel-480,193+x,992-pixel2-480,c);
+//line2(191+x,993-pixel-480,192+x,993-pixel2-480,c);
+//line2(192+x,993-pixel-480,193+x,993-pixel2-480,c);
+oldx:=x;
+  end;
+
+fh:=filecreate(songname+'_waveform.bmp');
+for i:=0 to 53 do
+  begin
+  b:=peek($80000+i);
+  filewrite(fh,b,1);
+  end;
+k:=0;
+for i:=1119 downto 0 do
+  for j:=0 to 1791 do
+   begin
+   idx:=dpeek($F000000+2*(1792*i+j));
+   bmpi:=lpeek($10000+4*idx);
+   bmpbuf[k]:=bmpp;
+   k+=1;
+   end;
+filewrite(fh,bmpbuf,6021120);
+fileclose (fh);
+fh:=-1;
+
+outtextxyz(16,1080,'(Ready - Press any key or mouse button to return)',0,2,2);
+repeat application.processmessages until (peek($60028)<>0) or (peek($60030)<>0);
+
+blit($F000000,0,0,$E400000,0,0,1792,1120,1792,1792);
+blit($FC00000,0,0,$F000000,0,0,1792,1120,1792,1792);
+
+end;
+
+procedure anal2(filename:string);
+
+label p999;
+
+const rld=1.0072464122237038980903435690978;
+      magic='12345678';
+var
+    c,s,v,pow,maxi,id,qqs,qqc,rj,freq:double;
+    intfreq:integer;
+     q:int64;
+     msg:cwindow;
+    p:pointer;
+    ps:^smallint absolute p;
+    maxpos,pos,i,j,k,fh,fho,il:integer;
+    outfile:ffreqs1;
+    buf1:array[0..24575] of smallint;
+        minis:array[0..8191] of double;
+    tmprec:freqs1;
+    results:array[0..109227] of freqs1;
+    time:integer;
+     noisefloor,maxnoisefloor:array[0..109227] of double;
+
+
+begin
+ //35=16 Hz, 966=20 kHz; nfreqs=931;
+// dla każdej częstotliwosci, 5 okresów / b=0.2, sin2, pracujemy na 192 kHz
+
+q:=filesize(filename);
+if q>$80000000 then  // file > 2GB, run away
+  begin
+  msg:=cwindow.create(700,600,340,80,340,80,15,0,'Error');
+  outtextxy(712,628,'File too long (>2GB) - press any key.', 40);
+  repeat wait(1) until peek($60028)<>0;
+  poke($60028,0);
+  msg.destroy;
+  goto p999;
+  end;
+
+for i:=0 to 1048575 do buf2[i]:=0;
+   {
+fh:=fileopen(filename,$40);
+
+// get noise floor
+maxi:=1e99;
+pos:=0;
+repeat
+  pow:=0;
+  il:=fileread(fh,buf1,1536);
+  for i:=0 to 383 do pow+=sqr(buf1[i]);
+  if pow<maxi then
+    begin
+    maxi:=pow;
+    maxpos:=pos;
+    end;
+  pos+=384;
+until il<1536;
+for i:=0 to 8191 do noisefloor[i]:=0;
+for i:=0 to 8191 do maxnoisefloor[i]:=0;
+for i:=0 to 383 do
+  begin
+  fileseek(fh,2*maxpos+2*i,fsfrombeginning);
+  fileread(fh,buf1,768);
+  for j:=0 to 383 do buf2[j]:=buf1[j]*sqr(sin(j*pi/384));
+  form1.fft2.fft;
+  for j:=0 to 8191 do
+    begin
+    v:=sqrt(sqr(form1.fft2.transformeddata[j].real) +sqr(form1.fft2.transformeddata[j].imag))/96;
+    if v>maxnoisefloor[j] then maxnoisefloor[j]:=v;
+    noisefloor[j]+=v;
+    end;
+  end;
+for i:=0 to 8191 do noisefloor[i]/=384;
+fileclose(fh);
+
+  }
+
+fh:=fileopen(filename,$40);
+assignfile(outfile,'d:\outfile.max');
+rewrite(outfile);
+repeat
+  fileseek(fh,44+2*192*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*24576);
+  for i:=0 to 24575 do buf2[i]:=buf1[i]*sqr(sin(i*pi/24576));
+  for i:=0 to 1023 do
+    begin
+    c:=0;
+    s:=0;
+    for j:=0 to 24575 do
+      begin
+      s+=buf2[j]*sin(j*2*pi*freqtable[i]/192000);
+      c+=buf2[j]*cos(j*2*pi*freqtable[i]/192000);
+      end;
+    tmprec.ampl:=sqrt(sqr(s) +sqr(c))/6144;
+    tmprec.phs:=arctan2(c,s);
+    tmprec.freq:=freqtable[i];
+    tmprec.time:=time;
+    results[i]:=tmprec;
+    end;
+
+  for i:=1 to 1022 do if (results[i].ampl>results[i-1].ampl) and (results[i].ampl>results[i+1].ampl) and (results[i].ampl>100{noisefloor[i]}) then
+       write(outfile,results[i]);
+  time+=64;
+  box(1000,600,640,64,0);
+  outtextxy(1008,608,'time='+inttostr(time),15);
+  application.processmessages;
+until il<2*24576;
+fileclose(fh);
+closefile(outfile);
+p999:
+
+end;
+
+procedure anal1(filename:string);
+
+label p999;
+
+const rld=1.0072464122237038980903435690978;
+      magic='12345678';
+      fft1m=0.18310546875;
+      fft2m=1.46484375;
+      fft3m=11.71875;
+
+// coby nie było dziur, granice muszą stać na przełomach najkrótszego fft!
+var
+    v,pow,maxi,id,qqs,qqc,rj,freq:double;
+    intfreq:integer;
+     q:int64;
+     msg:cwindow;
+    p:pointer;
+    ps:^smallint absolute p;
+    maxpos,pos,i,j,k,fh,fho,il:integer;
+    outfile:ffreqs1;
+    buf1:array[0..24575] of smallint;
+        minis:array[0..3788] of double;
+    tmprec:freqs1;
+    time:integer;
+     noisefloor,maxnoisefloor:array[0..8191] of double;
+begin
+// multiresolution stft
+// 2..20 k - 16384 samples - 11.718 Hz - 85.33 ms  -time res = 2 ms = 384 spl;
+// 200..2k - 131072 samples - 1.465 Hz  - time res = 16 ms = 3072 spl
+// 20..200 - 1048576 samples - 0.183 Hz - time res = 128 ms = 24576 spl
+for i:=0 to 1048575 do buf2[i]:=0;
+q:=filesize(filename);
+time:=0;
+if q>$80000000 then  // file > 2GB, run away
+  begin
+  msg:=cwindow.create(700,600,340,80,340,80,15,0,'Error');
+  outtextxy(712,628,'File too long (>2GB) - press any key.', 40);
+  repeat wait(1) until peek($60028)<>0;
+  poke($60028,0);
+  msg.destroy;
+  goto p999;
+  end;
+for i:=0 to 1048575 do buf2[i]:=0;
+
+fh:=fileopen(filename,$40);
+
+// get noise floor
+maxi:=1e99;
+pos:=0;
+repeat
+  pow:=0;
+  il:=fileread(fh,buf1,1536);
+  for i:=0 to 383 do pow+=sqr(buf1[i]);
+  if pow<maxi then
+    begin
+    maxi:=pow;
+    maxpos:=pos;
+    end;
+  pos+=384;
+until il<1536;
+for i:=0 to 8191 do noisefloor[i]:=0;
+for i:=0 to 8191 do maxnoisefloor[i]:=0;
+for i:=0 to 383 do
+  begin
+  fileseek(fh,2*maxpos+2*i,fsfrombeginning);
+  fileread(fh,buf1,768);
+  for j:=0 to 383 do buf2[j]:=buf1[j]*sqr(sin(j*pi/384));
+  form1.fft2.fft;
+  for j:=0 to 8191 do
+    begin
+    v:=sqrt(sqr(form1.fft2.transformeddata[j].real) +sqr(form1.fft2.transformeddata[j].imag))/96;
+    if v>maxnoisefloor[j] then maxnoisefloor[j]:=v;
+    noisefloor[j]+=v;
+    end;
+  end;
+for i:=0 to 8191 do noisefloor[i]/=384;
+fileclose(fh);
+for i:=109 to 1102 do minis[i-109]:=maxnoisefloor[i div 64] ;
+for i:=127 to 1375 do minis[i+994-127]:=maxnoisefloor[i div 8];
+for i:=161 to 1706 do minis[i+2243-161]:=maxnoisefloor[i];
+
+// 1 time unit = 192 spl = 1 ms
+// make a multires fft
+// low
+
+//for i:=0 to 3788 do minis[i]:=1e99;
+
+fh:=fileopen(filename,$40);
+assignfile(outfile,'d:\outfile.low');
+rewrite(outfile);
+repeat
+  fileseek(fh,44+2*192*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*24576);
+  for i:=0 to 24575 do buf2[i]:=buf1[i]*sqr(sin(i*pi/24576));
+  form1.fft4.fft;
+  // get results from 20 to 200 Hz - 109 to  1092
+  for i:=109 to 1092+10 do
+    begin
+    tmprec.ampl:=sqrt(sqr(form1.fft4.transformeddata[i].real) +sqr(form1.fft4.transformeddata[i].imag))/6144;
+    tmprec.phs:=arctan2(form1.fft4.transformeddata[i].real,form1.fft4.transformeddata[i].imag);
+    tmprec.freq:=i*fft1m;
+    tmprec.time:=time;
+    write(outfile,tmprec);
+//    if tmprec.ampl<minis[i-109] then minis[i-109]:=tmprec.ampl;
+    end;
+  time+=64;
+  box(1000,600,640,64,0);
+  outtextxy(1008,608,'Pass 1 - low; time='+inttostr(time),15);
+  application.processmessages;
+until il<2*24576;
+fileclose(fh);
+closefile(outfile);
+
+for i:=0 to 1048575 do buf2[i]:=0;
+
+//medium
+
+time:=0;
+fh:=fileopen(filename,$40);
+assignfile(outfile,'d:\outfile.med');
+rewrite(outfile);
+repeat
+  fileseek(fh,44+2*192*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*3072);
+  for i:=0 to 3071 do buf2[i]:=buf1[i]*sqr(sin(i*pi/3072));
+  form1.fft3.fft;
+  // get results from 200 to 2000 Hz - 137 to  1365
+  for i:=137-10 to 1365+10 do
+    begin
+    tmprec.ampl:=sqrt(sqr(form1.fft3.transformeddata[i].real) +sqr(form1.fft3.transformeddata[i].imag))/768;
+    tmprec.phs:=arctan2(form1.fft3.transformeddata[i].real,form1.fft3.transformeddata[i].imag);
+    tmprec.freq:=i*fft2m;
+    tmprec.time:=time;
+    write(outfile,tmprec);
+//    if tmprec.ampl<minis[i+994-127] then minis[i+994-127]:=tmprec.ampl;
+    end;
+  time+=8;
+  box(1000,600,640,64,0);
+  outtextxy(1008,608,'Pass 2 - med; time='+inttostr(time),15);
+  application.processmessages;
+until il<2*3072;
+fileclose(fh);
+closefile(outfile);
+
+for i:=0 to 1048575 do buf2[i]:=0;
+
+//high
+time:=0;
+fh:=fileopen(filename,$40);
+assignfile(outfile,'d:\outfile.hi');
+rewrite(outfile);
+repeat
+  fileseek(fh,44+2*192*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*384);
+  for i:=0 to 383 do buf2[i]:=buf1[i]*sqr(sin(i*pi/384));
+  form1.fft2.fft;
+  // get results from 2k to 20k - 171 to  1706
+  for i:=171-10 to 1706 do
+    begin
+    tmprec.ampl:=sqrt(sqr(form1.fft2.transformeddata[i].real) +sqr(form1.fft2.transformeddata[i].imag))/96;
+    tmprec.phs:=arctan2(form1.fft2.transformeddata[i].real,form1.fft2.transformeddata[i].imag);
+    tmprec.freq:=i*fft3m;
+    tmprec.time:=time;
+    write(outfile,tmprec);
+//    if (tmprec.ampl<minis[i+2243-161]) then minis[i+2243-161]:=tmprec.ampl;
+    end;
+  time+=1;
+  box(1000,600,640,64,0);
+  outtextxy(1008,608,'Pass 3 - hi; time='+inttostr(time),15);
+  application.processmessages;
+until il<2*384;
+fileclose(fh);
+closefile(outfile);
+fh:=filecreate('d:\outfile.min');
+filewrite(fh,minis,3789*8);
+fileclose(fh);
+p999:
+end;
+
+procedure anal3(filename:string);
+
+label p999;
+
+const rld=1.0072464122237038980903435690978;
+      magic='12345678';
+      fft1m=0.18310546875;
+      fft2m=1.46484375;
+      fft3m=11.71875;
+
+// medium time res stft
+
+var
+    v,pow,maxi,id,qqs,qqc,rj,freq:double;
+    intfreq:integer;
+     q:int64;
+     msg:cwindow;
+    p:pointer;
+    ps:^smallint absolute p;
+    maxpos,pos,i,j,k,fh,fho,il:integer;
+    outfile:ffreqs1;
+    buf1:array[0..24575] of smallint;
+        minis:array[0..8191] of double;
+    tmprec:freqs1;
+    results:array[0..109227] of freqs1;
+    time:integer;
+     noisefloor,maxnoisefloor:array[0..109227] of double;
+begin
+// 1048576 samples - 0.183 Hz - time res = 128 ms = 24576 spl
+
+for i:=0 to 1048575 do buf2[i]:=0;
+q:=filesize(filename);
+time:=0;
+if q>$80000000 then  // file > 2GB, run away
+  begin
+  msg:=cwindow.create(700,600,340,80,340,80,15,0,'Error');
+  outtextxy(712,628,'File too long (>2GB) - press any key.', 40);
+  repeat wait(1) until peek($60028)<>0;
+  poke($60028,0);
+  msg.destroy;
+  goto p999;
+  end;
+for i:=0 to 1048575 do buf2[i]:=0;
+
+fh:=fileopen(filename,$40);
+
+// get noise floor
+maxi:=1e99;
+pos:=0;
+repeat
+  pow:=0;
+  il:=fileread(fh,buf1,1536);
+  for i:=0 to 383 do pow+=sqr(buf1[i]);
+  if pow<maxi then
+    begin
+    maxi:=pow;
+    maxpos:=pos;
+    end;
+  pos+=384;
+until il<1536;
+for i:=0 to 109227 do noisefloor[i]:=0;
+for i:=0 to 109227 do maxnoisefloor[i]:=0;
+for i:=0 to 383 do
+  begin
+  fileseek(fh,2*maxpos+2*i,fsfrombeginning);
+  fileread(fh,buf1,49152);
+  for j:=0 to 24575 do buf2[j]:=buf1[j]*sqr(sin(j*pi/24576));
+  form1.fft4.fft;
+  for j:=0 to 109227 do
+    begin
+    v:=sqrt(sqr(form1.fft4.transformeddata[j].real) +sqr(form1.fft4.transformeddata[j].imag))/96;
+    if v>maxnoisefloor[j] then maxnoisefloor[j]:=v;
+    noisefloor[j]+=v;
+    end;
+  end;
+for i:=0 to 109227 do noisefloor[i]/=384;
+fileclose(fh);
+//for i:=109 to 1102 do minis[i-109]:=maxnoisefloor[i div 64] ;
+//for i:=127 to 1375 do minis[i+994-127]:=maxnoisefloor[i div 8];
+for i:=0 to 8191 do minis[i]:=maxnoisefloor[i];
+
+// 1 time unit = 192 spl = 1 ms
+// make a multires fft
+// low
+
+//for i:=0 to 3788 do minis[i]:=1e99;
+
+fh:=fileopen(filename,$40);
+assignfile(outfile,'d:\outfile.max');
+rewrite(outfile);
+repeat
+  fileseek(fh,44+2*192*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*24576);
+  for i:=0 to 24575 do buf2[i]:=buf1[i]*sqr(sin(i*pi/24576));
+  form1.fft4.fft;
+  // get results from 20 to 200 Hz - 109 to  1092
+  for i:=109 to 109227 do
+    begin
+    tmprec.ampl:=sqrt(sqr(form1.fft4.transformeddata[i].real) +sqr(form1.fft4.transformeddata[i].imag))/6144;
+    tmprec.phs:=arctan2(form1.fft4.transformeddata[i].real,form1.fft4.transformeddata[i].imag);
+    tmprec.freq:=i*fft1m;
+    tmprec.time:=time;
+    results[i]:=tmprec;
+    end;
+  for i:=110 to 109226 do if (results[i].ampl>results[i-1].ampl) and (results[i].ampl>results[i+1].ampl) and (results[i].ampl>noisefloor[i]) then
+       write(outfile,results[i]);
+  time+=64;
+  box(1000,600,640,64,0);
+  outtextxy(1008,608,'time='+inttostr(time),15);
+  application.processmessages;
+until il<2*24576;
+fileclose(fh);
+closefile(outfile);
+
+fh:=filecreate('d:\outfile.min');
+filewrite(fh,minis,3789*8);
+fileclose(fh);
+p999:
+end;
+
+
+procedure getmax;
+
+var infile1,infile2,infile3,outfile:ffreqs1;
+    freqs:array[0..3788] of freqs1;
+    minis:array[0..3788] of double;
+    skl,i,time,fh:integer;
+    temprec:freqs1;
+
+//1536 1229 984
+
+begin
+
+
+assignfile(infile1,'d:\outfile.low');
+assignfile(infile2,'d:\outfile.med');
+assignfile(infile3,'d:\outfile.hi');
+assignfile(outfile,'d:\outfile.max');
+
+fh:=fileopen('d:\outfile.min',$40);
+fileread(fh,minis,3789*8);
+fileclose(fh);
+reset(infile1);
+reset(infile2);
+reset(infile3);
+rewrite(outfile);
+time:=0;
+
+repeat
+  if (time mod 64) = 0 then
+    for i:=0 to 993 do
+    begin
+    if not eof(infile1) then begin
+      read(infile1,temprec);
+      freqs[i]:=temprec;
+      end;
+    end;
+
+  if (time mod 8) = 0 then
+    for i:=994 to 2242 do
+    begin
+    if not eof(infile2) then begin
+      read(infile2,temprec);
+      freqs[i]:=temprec;
+      end;
+    end;
+
+  for i:=2243 to 3788 do
+
+    begin
+    if not eof(infile3) then begin
+      read(infile3,temprec);
+      freqs[i]:=temprec;
+      end;
+    end;
+
+// get noise floor
+  for i:=0 to 3788 do freqs[i].time:=time;
+
+  skl:=0;
+  for i:=1 to 3787 do if (freqs[i].ampl>freqs[i-1].ampl) and (freqs[i].ampl>freqs[i+1].ampl) and (freqs[i].ampl>minis[i]*1.1) then
+    begin
+    skl+=1;
+    if (i<984) and ((time mod 64)=0) then write(outfile,freqs[i])
+    else if (i>1004) and (i<2233) and  ((time mod 8)=0) then write(outfile,freqs[i])
+    else if (i>2252) then write(outfile,freqs[i]);
+    end;
+  time+=1;
+  application.processmessages ;
+  if (time mod 64)=0  then begin
+    box(1000,600,640,64,0);
+    outtextxy(1008,608,'time='+inttostr(time),15);
+    outtextxy(1008,630,'skl='+inttostr(skl),15);
+    end;
+  until eof(infile1) and eof(infile2) and eof(infile3);
+closefile(infile1);
+closefile(infile2);
+closefile(infile3);
+closefile(outfile);
+
+end;
+
+
+
+procedure synt1;
+
+label p999,p998;
+
+
+var maxi,start,i,fh:integer;
+    temprec:freqs1;
+    infile1:ffreqs1;
+
+const magic64:int64=$3837363534333231;
+
+begin
+fh:=filecreate('d:\output.raw');
+assignfile(infile1,'d:\outfile.max');
+reset(infile1);
+for i:=0 to 50000000 do ffilebuf[i]:=0;
+maxi:=0;
+
+repeat
+  read(infile1,temprec);
+  start:=192*temprec.time;
+//  if temprec.freq<200 then
+    begin
+    if maxi<start+24576 then maxi:=start+24576;
+    for i:=0 to 24575 do
+    begin
+    ffilebuf[i+start]+=temprec.ampl*sin(temprec.freq*2*pi*i/192000+temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>2000 then ffilebuf[i+start]+=0.7*temprec.ampl*sin(temprec.freq*4*pi*i/192000+2*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>1333 then ffilebuf[i+start]+=0.6*temprec.ampl*sin(temprec.freq*6*pi*i/192000+3*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>1000 then ffilebuf[i+start]+=0.4*temprec.ampl*sin(temprec.freq*8*pi*i/192000+4*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>800 then ffilebuf[i+start]+=0.3*temprec.ampl*sin(temprec.freq*10*pi*i/192000+5*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>666 then ffilebuf[i+start]+=0.2*temprec.ampl*sin(temprec.freq*12*pi*i/192000+6*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>571 then ffilebuf[i+start]+=0.15*temprec.ampl*sin(temprec.freq*14*pi*i/192000+7*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>500 then ffilebuf[i+start]+=0.1*temprec.ampl*sin(temprec.freq*16*pi*i/192000+8*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>444 then ffilebuf[i+start]+=0.1*temprec.ampl*sin(temprec.freq*18*pi*i/192000+9*temprec.phs)*sqr(sin(pi*i/24576));
+    if temprec.freq>400 then ffilebuf[i+start]+=0.1*temprec.ampl*sin(temprec.freq*20*pi*i/192000+10*temprec.phs)*sqr(sin(pi*i/24576));
+    end;
+    end ;
+//  else if (temprec.freq>200) and (temprec.freq<2000) then
+//    begin
+//    if maxi<start+3072 then maxi:=start+3072;
+//    for i:=0 to 3071 do
+//      ffilebuf[i+start]+=temprec.ampl*sin(temprec.freq*2*pi*i/192000+temprec.phs)*sqr(sin(pi*i/3072));
+//    end
+//  else
+//    begin
+//    if maxi<start+384 then maxi:=start+384;
+//    for i:=0 to 383 do
+//      ffilebuf[i+start]+=temprec.ampl*sin(temprec.freq*2*pi*i/192000+temprec.phs)*sqr(sin(pi*i/384));
+//    end;
+
+
+    application.processmessages ;
+    if (temprec.freq<200)  then begin
+      box(1000,600,640,64,0);
+      outtextxy(1008,608,'time='+inttostr(maxi),15);
+      end;
+
+
+until eof(infile1);
+close(infile1);
+for i:=0 to maxi do filebuf[i]:=round(ffilebuf[i]);
+filewrite(fh,filebuf,2*maxi);
+fileclose(fh);
+end;
+
+
+
+procedure synt2;
+
+label p999,p998;
+
+
+var b:int64;
+    bf:double absolute b;
+    il,freqind,i,j,k,b2,fh:integer;
+    filebuff:array[0..100000] of double;
+
+    s,c,id,rj:double;
+
+const magic64:int64=$3837363534333231;
+
+begin
+//b:=$3837363534333231;
+//outtextxy(500,700,floattostr(bf),15);
+for i:=0 to 50000000 do filebuf[i]:=0;
+fh:=fileopen('d:\output1a',$40);
+fileread(fh,b,8);
+if b<>$3837363534333231 then goto p999;
+repeat
+  p998:
+  fileread(fh,b2,4);
+  freqind:=b2;
+  box(1000,600,100,50,0);
+  outtextxy(1008,608,inttostr(freqind),15);
+  application.processmessages;
+  rj:=0;
+  j:=0;
+  for k:=0 to intfreqtable[freqind]-1 do filebuff[k]:=0;
+  repeat
+    il:=fileread(fh,bf,8);
+    if b<>magic64 then s:=b else goto p998;
+    il:=fileread(fh,b,8);
+    if b<>magic64 then c:=b else goto p998;
+    id:=0;
+    for k:=0 to intfreqtable[freqind]-1 do
+      begin
+      filebuff[k]:=2*s*testsignals[round(id)]/intfreqtable[freqind];
+      filebuff[k]+=2*c*testsignalc[round(id)]/intfreqtable[freqind];
+      id+=freqtable[freqind];
+      end;
+    for k:=0 to intfreqtable[freqind]-1 do filebuf[j+k]+=round(filebuff[k]);
+    rj+=intfreqtable[freqind]/2; // przesuń się o połowę sygnału testowego
+    j:=round(rj);
+  until il<>8;
+until il<>8;
+fileclose(fh);
+fh:=filecreate('d:/wynik.raw');
+filewrite(fh,filebuf,100000000);
+//fileclose(fh);
+p999:
+fileclose(fh);
+end;
+
+procedure plotcomps;
+
+
+
+
+
+var fh:integer;
+    buf:array[0..255] of integer;
+    songname:string;
+x,y,c:integer;
+
+       temprec:freqs1;
+    infile1:ffreqs1;
+
+
+
+begin
+
+assignfile(infile1,'d:\outfile.max');
+reset(infile1);
+blit($F000000,0,0,$CC00000,0,0,1792,1120,1792,1792);
+box(0,0,1792,1120,0);
+
+while not eof(infile1) do
+  begin
+  read(infile1,temprec);
+  x:=round(temprec.time div 4)-200;
+  y:=round(1120-log10(temprec.freq+0.0001)*250);
+  c:=round(log10(temprec.ampl)*3+2);
+  if temprec.freq<200 then line(x,y,16,0,c)
+  else if (temprec.freq>200) and (temprec.freq<2000) then line(x,y,2,0,c+32)
+  else putpixel (x,y,c+96);
+  end;
+repeat wait(1) until peek($60028)<>0;
+closefile(infile1);
+poke($60028,0);
+blit($CC00000,0,0,$F000000,0,0,1792,1120,1792,1792);
+
+
+end;
+
+
+procedure haar(f:string);
+
+//2048 spls; 2048-1024-512-256-128-64-32-16-8-4-2-1
+
+
+var h:double;
+    x,y,c,fh,il,i,j,k,l,m,n:integer;
+    intfreq:integer;
+    outfile:fhaars1;
+    buf1:array[0..16383] of smallint;
+    tmprec:haars1;
+    time:integer;
+    message:cwindow;
+    haars:array[0..14] of double;
+    colors:array[0..14,0..1750] of integer;
+
+begin
+for i:=0 to 14 do for j:=0 to 1750 do colors[i,j]:=0;
+time:=0;
+fh:=fileopen(f,$40);
+assignfile(outfile,'d:\outfile.har');
+rewrite(outfile);
+message:=cwindow.create(700,550,400,100,200,100,196,192,'Computing Haar transform');
+
+repeat
+  fileseek(fh,44+2*time,fsfrombeginning);
+  il:=fileread(fh,buf1,2*16384);
+
+  // do a haar! ------------
+
+  h:=0;
+  for i:=0 to 16383 do h+=buf1[i]; // średnia całości, haar[0]
+  h/=16384;
+  tmprec.freq:=-1;
+  tmprec.ampl:=h;
+  tmprec.time:=time;
+  write(outfile,tmprec);
+
+  h:=0;
+  for i:=0 to 8191 do h+=buf1[i]; // średnia połowy, haar[1]:=h1024-haar[0]
+  for i:=8192 to 16383 do h-=buf1[i];
+  h/=16384;
+  tmprec.freq:=0;
+  tmprec.ampl:=h;
+  tmprec.time:=time;
+  write(outfile,tmprec);
+
+  for k:=1 to 13 do
+
+    begin
+    l:=(1 shl k)-1; // 1,3,7,15,31,63,127,255,511,1023
+    m:=(8192 shr k)-1; // 511,255,127,63,31,15,7,3,1,0
+    n:=(16384 shr k); // 1024,512,256,128,64,3
+    for j:=0 to l do    //1,3,7,15,31.
+      begin
+      h:=0;
+      for i:=0 to m do h+=buf1[i+n*j]; //2 wsp. @512,
+      for i:=m+1 to n-1 do h-=buf1[i+n*j];
+      h/=(16384 shr k);
+      tmprec.freq:=k;
+      tmprec.ampl:=h;
+      tmprec.time:=time+j*(16384 shr k);
+      write(outfile,tmprec);
+      end;
+    end;
+
+// ----------------------- haaaaar
+
+  time+=16384;
+  message.checkmouse;
+  poke($60030,0);
+  message.cls;
+  message.outtextxyz(8,12,'time='+floattostr(time/192000),205,2,2);
+  message.redrawclient;
+  application.processmessages;
+until il<32768;
+message.cls;
+message.outtextxyz(24,12,'Ready. Press any key',205,2,2);
+message.redrawclient;
+repeat message.checkmouse; poke($60030,0); wait(1000) until peek($60028)<>0;
+poke($60028,0);
+message.destroy;
+fileclose(fh);
+system.close(outfile);
+
+fh:=filecreate('d:\haar.raw');
+for i:=0 to 50000000 do ffilebuf[i]:=0;
+for i:=0 to 11 do haars[i]:=0;
+message:=cwindow.create(10,10,1750,800,0,0,15,192,'Haar results');
+reset(outfile);
+while not eof(outfile) do
+  begin
+  read(outfile,tmprec);
+  h:=tmprec.ampl;
+  if tmprec.freq=-1 then m:=16384 else m:=(16384 shr tmprec.freq);
+  if tmprec.freq=-1 then for i:=tmprec.time to tmprec.time+m-1 do ffilebuf[i]+=h
+  else begin for i:=tmprec.time to tmprec.time+(m div 2)-1 do  ffilebuf[i]+=h ;
+             for i:=tmprec.time+(m div 2) to tmprec.time+m-1 do  ffilebuf[i]-=h ;
+             end;
+            {
+//-------------plot wavelets------------------- @1024 spl/px
+
+  if abs(tmprec.ampl)>1 then c:=16*tmprec.freq+16+round(3*(log10(abs(tmprec.ampl)))) else c:=16*tmprec.freq+16;
+    x:=round((187.5)*(tmprec.time/192000));
+   if x>1750 then x:=1750;
+   y:=280-tmprec.freq*12;
+   if tmprec.freq>4 then
+     begin
+     if colors[tmprec.freq,x]<c then begin message.box3(x,y,1,10,c); colors[tmprec.freq,x]:=c; end;
+     end
+    else if tmprec.freq=4 then message.box3(x,y,1,10,c)
+   else if tmprec.freq=3 then message.box3(x,y,2,10,c)
+   else if tmprec.freq=2 then message.box3(x,y,4,10,c)
+   else if tmprec.freq=1 then message.box3(x,y,8,10,c)
+   else if tmprec.freq<1 then message.box(x,y,16,10,c);
+ //-------------------------------------------------------------------------
+           }
+ //-------------plot wavelets------------------- @128 spl/px
+
+  if abs(tmprec.ampl)>10 then c:=16*tmprec.freq+16+round(4*(log10(abs(tmprec.ampl/10))))
+     else
+       c:=16*tmprec.freq+16;
+    x:=round((187.5)*8*(tmprec.time/192000));
+   if x>1750 then x:=1750;
+   if x<0 then x:=0;
+   y:=680-tmprec.freq*24;
+   if tmprec.freq>7 then
+     begin
+     if colors[tmprec.freq,x]<c then begin message.box3(x,y,1,24,c); colors[tmprec.freq,x]:=c; end;
+     end
+   else if tmprec.freq=7 then message.box3(x,y,1,24,c)
+   else if tmprec.freq=6 then message.box3(x,y,2,24,c)
+   else if tmprec.freq=5 then message.box3(x,y,4,24,c)
+
+
+   else if tmprec.freq=4 then message.box3(x,y,8,24,c)
+   else if tmprec.freq=3 then message.box3(x,y,16,24,c)
+   else if tmprec.freq=2 then message.box3(x,y,32,24,c)
+   else if tmprec.freq=1 then message.box3(x,y,64,24,c)
+   else if tmprec.freq<1 then message.box(x,y,128,24,c);
+
+ //-------------------------------------------------------------------------
+   if tmprec.time mod 1024=1022 then
+     begin
+
+     message.checkmouse;
+     message.redrawclient;
+     poke($60030,0);
+     application.processmessages;
+     end;
+   end;
+for i:=0 to time do filebuf[i]:=round(ffilebuf[i]) ;
+ for i:=0 to 1750 do
+    for j:=0 to 127 do
+      message.putpixel(i,200-filebuf[128*i+j] div 128,178);
+ message.redrawclient;
+filewrite(fh,filebuf,time*2);
+fileclose(fh);
+repeat message.checkmouse; poke($60030,0); wait(10) until peek($60032)<>0;
+closefile(outfile);
+message.destroy;
+end;
+
+
+
+end.
+
