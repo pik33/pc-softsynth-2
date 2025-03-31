@@ -524,6 +524,8 @@ end;
 
 procedure sdlevents;
 
+label p101;
+
 var qq:integer;
     qqb:boolean absolute qq;
     aevent:tsdl_event;
@@ -533,61 +535,54 @@ const x:integer=0;
       y:integer=0;
 
 begin
-repeat
-  qqb:=sdl_pollevent(@aevent);
-
-if (qq>0) then if aevent.window._type=SDL_EVENT_WINDOW_MOUSE_ENTER then needrestart:=1;
-
-if (qq>0) then if aevent.window._type=SDL_EVENT_WINDOW_CLOSE_REQUESTED then needclose:=1;
-
-
-
-  if (qq<>0) and (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
+qqb:=sdl_pollevent(@aevent);
+if not qqb then goto p101;
+if aevent.window._type=SDL_EVENT_WINDOW_MOUSE_ENTER then needrestart:=1;
+if aevent.window._type=SDL_EVENT_WINDOW_CLOSE_REQUESTED then needclose:=1;
+if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
+  begin
+  x:=round(aevent.motion.x);
+  y:=round(aevent.motion.y);
+  if (peek($70002)=1) and (x<64) then x:=64;
+  if (peek($70002)=1) and (x>1855) then x:=1855;
+  if (peek($70002)=1) and (y<40) then y:=40;
+  if (peek($70002)=1) and (y>1159) then y:=1159;
+  ramw^[$30016]:=x;
+  ramw^[$30017]:=y;
+  end
+else if (aevent._type=SDL_EVENT_MOUSE_BUTTON_DOWN)  then
+  begin
+  if aevent.button.down=true then
     begin
-    x:=round(aevent.motion.x);
-    y:=round(aevent.motion.y);
-    if (peek($70002)=1) and (x<64) then x:=64;
-    if (peek($70002)=1) and (x>1855) then x:=1855;
-    if (peek($70002)=1) and (y<40) then y:=40;
-    if (peek($70002)=1) and (y>1159) then y:=1159;
-    ramw^[$30016]:=x;
-    ramw^[$30017]:=y;
-
-    end
-  else if (qq<>0) and (aevent._type=SDL_EVENT_MOUSE_BUTTON_DOWN)  then
+    ramb^[$60033]:=aevent.button.clicks;
+    ramb^[$60030]:=aevent.button.button;
+    ramb^[$60032]:=ramb^[$60032] or (1 shl aevent.button.button);
+    end;
+  end
+else if (aevent._type=SDL_EVENT_MOUSE_BUTTON_UP)  then
+  begin
+  if aevent.button.down=false then
     begin
-    if aevent.button.down=true then
-      begin
-      ramb^[$60033]:=aevent.button.clicks;
-      ramb^[$60030]:=aevent.button.button;
-      ramb^[$60032]:=ramb^[$60032] or (1 shl aevent.button.button);
-      end;
-    end
-  else if (qq<>0) and (aevent._type=SDL_EVENT_MOUSE_BUTTON_UP)  then
-    begin
-    if aevent.button.down=false then
-      begin
 //      ramb^[$60033]:=aevent.button.clicks;
 //      ramb^[$60030]:=aevent.button.button;
-      ramb^[$60032]:=ramb^[$60032] and not (1 shl aevent.button.button);
-      end;
-    end
-  else if (qq<>0) and (aevent._type=SDL_EVENT_MOUSE_WHEEL)  then
-    begin
-      begin
-      ramb^[$60033]:=2;
-      ramb^[$60031]:=round(aevent.wheel.y);
-      end;
-    end
-
-  else if (qq<>0) and (aevent._type=SDL_EVENT_KEY_DOWN) then
-    begin
-    ramb^[$6002B]:=1;
-    key:=aevent.key.key;
-    key:=(key shr 24) shl 8 + (key and $FF);
-    dpoke($60028,key);
+    ramb^[$60032]:=ramb^[$60032] and not (1 shl aevent.button.button);
     end;
-  until qq=0;
+  end
+else if (aevent._type=SDL_EVENT_MOUSE_WHEEL)  then
+  begin
+    begin
+    ramb^[$60033]:=2;
+    ramb^[$60031]:=round(aevent.wheel.y);
+    end;
+  end
+else if (aevent._type=SDL_EVENT_KEY_DOWN) then
+  begin
+  ramb^[$6002B]:=1;
+  key:=aevent.key.key;
+  key:=(key shr 24) shl 8 + (key and $FF);
+  dpoke($60028,key);
+  end;
+p101:
 end;
 
 //  ---------------------------------------------------------------------

@@ -23,7 +23,6 @@
         <EditorIndex Value="11"/>
         <TopLine Value="699"/>
         <CursorPos X="3" Y="939"/>
-        <ComponentState Value="1"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -39,10 +38,9 @@
       <Unit3>
         <Filename Value="retro.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="53"/>
-        <CursorPos X="10" Y="53"/>
+        <TopLine Value="516"/>
+        <CursorPos X="17" Y="528"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit3>
@@ -203,14 +201,15 @@
       </Unit24>
       <Unit25>
         <Filename Value="retro3.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="12"/>
-        <TopLine Value="574"/>
-        <CursorPos Y="592"/>
+        <TopLine Value="553"/>
+        <CursorPos X="2" Y="578"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit25>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="retro.pas"/>
         <Caret Line="279" TopLine="261"/>
@@ -321,16 +320,12 @@
       </Position27>
       <Position28>
         <Filename Value="retro.pas"/>
-        <Caret Line="247" TopLine="248"/>
+        <Caret Line="309" Column="3" TopLine="280"/>
       </Position28>
       <Position29>
         <Filename Value="retro.pas"/>
-        <Caret Line="309" Column="3" TopLine="280"/>
-      </Position29>
-      <Position30>
-        <Filename Value="retro.pas"/>
         <Caret Line="650" Column="10" TopLine="635"/>
-      </Position30>
+      </Position29>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
