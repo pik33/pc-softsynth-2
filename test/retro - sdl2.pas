@@ -40,7 +40,7 @@
 
 // graphic modes: 00..15 256 col; 16..31 64k col; 32..47 32bit col; 48..63 ham (?)
 
-unit retro3;
+unit retro;
 
 // stripped down retromachine for sound project. Only Graphics 16 left.
 // 70001 - raster interrupts effect
@@ -50,7 +50,7 @@ unit retro3;
 
 interface
 
-uses sdl3,sysutils,crt,classes,windows,forms,audio;
+uses sdl2,sysutils,crt,classes,windows,forms,audio;
 
 type tram=array[0..67108863] of integer;
      tramw=array[0..134217727] of word;
@@ -108,7 +108,7 @@ var fh:integer;
        w16p:^smallint absolute currentwp;
        w32p:^single absolute currentwp;
 
- //      cvt:TSdl_audiocvt;
+       cvt:TSdl_audiocvt;
        il,currentil:integer;
 
        currentdatasize, samplenum:int64;
@@ -173,7 +173,7 @@ begin
 if (a.freq=b.freq)
     and (a.format=b.format)
     and (a.channels=b.channels)
- //   and (a.samples=b.samples)
+    and (a.samples=b.samples)
 then result:=true else result:=false;
 end;
 
@@ -200,32 +200,26 @@ end;
 procedure TRetro.Execute;
 
 var p3:pointer;
-  p4:pbyte absolute p3;
     t:int64;
-      i:integer;
-     d:boolean;
-   driver:pchar;
-   s:psdl_surface;
 
 begin
-s:=SDL_LoadBMP('.\lettuce.bmp');
-d:=SDL_Init(SDL_INIT_audio or SDL_INIT_video or SDL_INIT_events);
-    driver:=sdl_getrenderdriver(3);
-//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'best'); // make the scaled rendering look smoother.
+SDL_Init(SDL_INIT_everything);
+
+SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'best'); // make the scaled rendering look smoother.
 SDL_SetHint(SDL_HINT_RENDER_DIRECT3D_THREADSAFE, '1');
-if peek($70002)=1 then scr := SDL_CreateWindow( 'The Retromachine', 1792,1120 , SDL_WINDOW_fullscreen)
-else scr := SDL_CreateWindow( 'The Retromachine',  1792,1120, 0);
-sdlRenderer := SDL_CreateRenderer(scr,nil);
+if peek($70002)=1 then scr := SDL_CreateWindow( 'The Retromachine', SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1792,1120 , SDL_WINDOW_fullscreen_desktop)
+else scr := SDL_CreateWindow( 'The Retromachine', SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1792,1120, SDL_WINDOW_shown);
+sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
 if peek($70002)=1  then begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
-                                   SDL_SetRenderLogicalPresentation(sdlRenderer,1920,1200,SDL_LOGICAL_PRESENTATION_STRETCH);
+                                   SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
                                    end
 else begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1792,1120);
-                                   SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,SDL_LOGICAL_PRESENTATION_STRETCH);
+                                   SDL_RenderSetLogicalSize(sdlRenderer,1792,1120);
                                    end ;
 
-sdl_hidecursor;             // hide sdl cursor
-//sdl_sound_init;
-//sdl_pauseaudio(0);
+sdl_showcursor(0);             // hide sdl cursor
+sdl_sound_init;
+sdl_pauseaudio(0);
 running:=1;                               // tell them the machine is running
 
 repeat
@@ -249,25 +243,25 @@ if (p2<>nil) then                           // the screen is prepared
 
     SDL_DestroyTexture( sdlTexture );
     SDL_DestroyRenderer( sdlRenderer );
-    sdlRenderer := SDL_CreateRenderer(scr,nil);
+    sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
     if peek($70002)=0 then begin
-      if needrestart=2 then sdl_setwindowfullscreen(scr,false);
+      if needrestart=2 then sdl_setwindowfullscreen(scr,0);
       sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1792,1120);
-       SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_STRETCH);
+      SDL_RenderSetLogicalSize(sdlRenderer,1792,1120);
       end
     else
     begin
-      if needrestart=2 then sdl_setwindowfullscreen(scr,true);
+      if needrestart=2 then sdl_setwindowfullscreen(scr,SDL_WINDOW_FULLSCREEN_DESKTOP);
       sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1920,1200,  SDL_LOGICAL_PRESENTATION_STRETCH);
+      SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
       end ;
         needrestart:=0;
     end;
 
    if peek($70002)=1 then SDL_UpdateTexture(sdlTexture, nil, p2, 1920 * 4)   // render the screen
-  else SDL_UpdateTexture(sdlTexture,nil, p2, 1792 * 4) ;
+  else SDL_UpdateTexture(sdlTexture, nil, p2, 1792 * 4) ;
   SDL_RenderClear(sdlRenderer);
-  SDL_RenderTexture(sdlRenderer, sdlTexture,nil,nil);
+  SDL_RenderCopy(sdlRenderer, sdlTexture,nil,nil);
   SDL_RenderPresent(sdlRenderer);
   poke ($70000,1);                        // screen rendered, resizing possible
 
@@ -286,35 +280,33 @@ if (p2<>nil) then                           // the screen is prepared
     needrestart:=0;
     SDL_DestroyTexture( sdlTexture );
     SDL_DestroyRenderer( sdlRenderer );
-    sdlRenderer := SDL_CreateRenderer(scr, nil);
+    sdlRenderer := SDL_CreateRenderer(scr, -1, 14);
     if peek($70002)=0 then begin
       sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1792,1120);
-     SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_STRETCH);
+      SDL_RenderSetLogicalSize(sdlRenderer,1792,1120);
       end
     else
     begin
       sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1920,1200,  SDL_LOGICAL_PRESENTATION_STRETCH);
+      SDL_RenderSetLogicalSize(sdlRenderer,1920,1200);
       end ;
     end;
   vblank;
   repeat until peek($70000)<2;
   poke ($70000,0);
-//  for i:=0 to 65536 do p4[i]:=round(256*random);
+
   if peek($70002)=1  then SDL_UpdateTexture(sdlTexture, nil, p3, 1920 * 4)
   else  SDL_UpdateTexture(sdlTexture, nil, p3, 1792 * 4);
- // SDL_SetRenderDrawColorFloat(sdlrenderer, Random, Random, Random, SDL_ALPHA_OPAQUE);
   SDL_RenderClear(sdlRenderer);
-//  sdlTexture:=SDL_CreateTextureFromSurface(sdlRenderer, s);
-
-  d:=  SDL_Rendertexture(sdlRenderer, sdlTexture,nil,nil);
+  SDL_RenderCopy(sdlRenderer, sdlTexture,nil,nil);
   SDL_RenderPresent(sdlRenderer);
   poke($70000,1) ;
 
   end;
 until terminated;
 running:=0;
-sdl_pauseaudiodevice(0);
+sdl_pauseaudio(1);
+sdl_closeaudio;
 SDL_DestroyTexture( sdlTexture );
 SDL_DestroyRenderer( sdlRenderer );
 SDL_DestroyWindow ( scr);
@@ -524,10 +516,7 @@ end;
 
 procedure sdlevents;
 
-label p101;
-
 var qq:integer;
-    qqb:boolean absolute qq;
     aevent:tsdl_event;
     key:cardinal;
 
@@ -535,54 +524,61 @@ const x:integer=0;
       y:integer=0;
 
 begin
-qqb:=sdl_pollevent(@aevent);
-if not qqb then goto p101;
-if aevent.window._type=SDL_EVENT_WINDOW_MOUSE_ENTER then needrestart:=1;
-if aevent.window._type=SDL_EVENT_WINDOW_CLOSE_REQUESTED then needclose:=1;
-if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
-  begin
-  x:=round(aevent.motion.x);
-  y:=round(aevent.motion.y);
-  if (peek($70002)=1) and (x<64) then x:=64;
-  if (peek($70002)=1) and (x>1855) then x:=1855;
-  if (peek($70002)=1) and (y<40) then y:=40;
-  if (peek($70002)=1) and (y>1159) then y:=1159;
-  ramw^[$30016]:=x;
-  ramw^[$30017]:=y;
-  end
-else if (aevent._type=SDL_EVENT_MOUSE_BUTTON_DOWN)  then
-  begin
-  if aevent.button.down=true then
+repeat
+  qq:=sdl_pollevent(@aevent);
+
+if (qq>0) and (aevent.type_=sdl_windowevent) then if aevent.window.event=SDL_WINDOWEVENT_ENTER then needrestart:=1;
+
+if (qq>0) and (aevent.type_=sdl_windowevent) then if aevent.window.event=SDL_WINDOWEVENT_CLOSE then needclose:=1;
+
+
+
+  if (qq<>0) and (aevent.type_=sdl_mousemotion)  then
     begin
-    ramb^[$60033]:=aevent.button.clicks;
-    ramb^[$60030]:=aevent.button.button;
-    ramb^[$60032]:=ramb^[$60032] or (1 shl aevent.button.button);
-    end;
-  end
-else if (aevent._type=SDL_EVENT_MOUSE_BUTTON_UP)  then
-  begin
-  if aevent.button.down=false then
+    x:=aevent.motion.x;
+    y:=aevent.motion.y;
+    if (peek($70002)=1) and (x<64) then x:=64;
+    if (peek($70002)=1) and (x>1855) then x:=1855;
+    if (peek($70002)=1) and (y<40) then y:=40;
+    if (peek($70002)=1) and (y>1159) then y:=1159;
+    ramw^[$30016]:=x;
+    ramw^[$30017]:=y;
+
+    end
+  else if (qq<>0) and (aevent.type_=sdl_mousebuttondown)  then
     begin
+    if aevent.button.state=sdl_pressed then
+      begin
+      ramb^[$60033]:=aevent.button.clicks;
+      ramb^[$60030]:=aevent.button.button;
+      ramb^[$60032]:=ramb^[$60032] or (1 shl aevent.button.button);
+      end;
+    end
+  else if (qq<>0) and (aevent.type_=sdl_mousebuttonup)  then
+    begin
+    if aevent.button.state=sdl_released then
+      begin
 //      ramb^[$60033]:=aevent.button.clicks;
 //      ramb^[$60030]:=aevent.button.button;
-    ramb^[$60032]:=ramb^[$60032] and not (1 shl aevent.button.button);
-    end;
-  end
-else if (aevent._type=SDL_EVENT_MOUSE_WHEEL)  then
-  begin
+      ramb^[$60032]:=ramb^[$60032] and not (1 shl aevent.button.button);
+      end;
+    end
+  else if (qq<>0) and (aevent.type_=sdl_mousewheel)  then
     begin
-    ramb^[$60033]:=2;
-    ramb^[$60031]:=round(aevent.wheel.y);
+      begin
+      ramb^[$60033]:=2;
+      ramb^[$60031]:=aevent.wheel.y;
+      end;
+    end
+
+  else if (qq<>0) and (aevent.type_=sdl_keydown) then
+    begin
+    ramb^[$6002B]:=1;
+    key:=aevent.key.keysym.sym;
+    key:=(key shr 24) shl 8 + (key and $FF);
+    dpoke($60028,key);
     end;
-  end
-else if (aevent._type=SDL_EVENT_KEY_DOWN) then
-  begin
-  ramb^[$6002B]:=1;
-  key:=aevent.key.key;
-  key:=(key shr 24) shl 8 + (key and $FF);
-  dpoke($60028,key);
-  end;
-p101:
+  until qq=0;
 end;
 
 //  ---------------------------------------------------------------------
@@ -709,7 +705,7 @@ pi:=screen;
 l:=0;
 k:=0;
 for i:=0 to 1119 do
-  for j:=0 to 1791 do begin (pi+k)^:=round($FFFFFFFF*random()); end;//raml^[$4000+ramw^[buf+l]]; k+=1; l+=1; end;
+  for j:=0 to 1791 do begin (pi+k)^:=raml^[$4000+ramw^[buf+l]]; k+=1; l+=1; end;
 end;
 
 
@@ -1130,6 +1126,15 @@ end;
 function sdl_sound_init:integer;
 
 begin
+Result:=0;
+desired.freq := 192000;                                     // sample rate
+desired.format := AUDIO_F32;                                // 16-bit samples
+desired.samples := 4096;                                    // samples for 1 callback
+desired.channels := 2;                                      // stereo
+desired.callback := @AudioCallback;
+desired.userdata := nil;
+if (SDL_OpenAudio(@desired, @obtained) < 0) then result:=-2
+else if desired<>obtained then result:=-1;
 end;
 
 procedure AudioCallback(userdata:pointer; audio:Pbyte; length:integer); cdecl;
@@ -1140,7 +1145,19 @@ var audio2:psingle;
 //const j:integer=0;
 
 begin
+ if juzmoznagrac<0 then begin jj:=0;sdl_pauseaudio(1); end;
+ if juzmoznagrac>=0 then
+  begin
+  audio2:=psingle(audio);
+  for i:=0 to 8191 do
+    begin
+    audio2[i]:=w32p[i+8192*jj];
+    end;
+  jj+=1;
+  playtime:=jj*4096/192;
 
+  if (jj+1)*8192>=2*samplenum then begin juzmoznagrac:=-1; jj:=0; playtime:=0; sdl_pauseaudio(1); end;
+  end;
 end;
 
 

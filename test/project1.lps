@@ -8,10 +8,9 @@
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <CursorPos Y="21"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1.pas"/>
@@ -20,9 +19,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="699"/>
-        <CursorPos X="3" Y="939"/>
+        <CursorPos X="28" Y="9"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -30,17 +27,18 @@
       <Unit2>
         <Filename Value="cwindows.pas"/>
         <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="103"/>
         <CursorPos X="3" Y="118"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="retro.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="516"/>
-        <CursorPos X="17" Y="528"/>
+        <TopLine Value="190"/>
+        <CursorPos X="96" Y="205"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit3>
@@ -55,19 +53,17 @@
       <Unit5>
         <Filename Value="audio.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="28" Y="294"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="sdl2.pas"/>
         <UnitName Value="SDL2"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="2332"/>
         <CursorPos X="3" Y="2354"/>
         <UsageCount Value="100"/>
-        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="c:\lazarus64\fpc\2.6.4\source\rtl\objpas\sysutils\sysstrh.inc"/>
@@ -146,190 +142,195 @@
       </Unit17>
       <Unit18>
         <Filename Value="SDL3\SDL_video.inc"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="298"/>
         <CursorPos X="10" Y="319"/>
-        <UsageCount Value="14"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="15"/>
       </Unit18>
       <Unit19>
         <Filename Value="SDL3\SDL_render.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="156"/>
         <CursorPos X="10" Y="174"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="14"/>
       </Unit19>
       <Unit20>
         <Filename Value="SDL3\SDL_mouse.inc"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos X="10" Y="85"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="14"/>
       </Unit20>
       <Unit21>
         <Filename Value="SDL3\SDL_audio.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="10" Y="63"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="14"/>
       </Unit21>
       <Unit22>
         <Filename Value="SDL3\SDL_events.inc"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="538"/>
         <CursorPos X="14" Y="549"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="14"/>
       </Unit22>
       <Unit23>
         <Filename Value="SDL3\SDL_rect.inc"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="3" Y="32"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="13"/>
       </Unit23>
       <Unit24>
         <Filename Value="SDL3\SDL_surface.inc"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="45"/>
         <CursorPos X="18" Y="69"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="12"/>
       </Unit24>
       <Unit25>
         <Filename Value="retro3.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="12"/>
-        <TopLine Value="31"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="2" Y="578"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="11"/>
       </Unit25>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="retro.pas"/>
-        <Caret Line="279" TopLine="261"/>
+        <Caret Line="122" Column="15" TopLine="98"/>
       </Position1>
       <Position2>
         <Filename Value="retro.pas"/>
-        <Caret Line="278" TopLine="261"/>
+        <Caret Line="696" Column="51" TopLine="672"/>
       </Position2>
       <Position3>
         <Filename Value="retro.pas"/>
-        <Caret Line="473" TopLine="454"/>
+        <Caret Line="714" TopLine="676"/>
       </Position3>
       <Position4>
         <Filename Value="retro.pas"/>
-        <Caret Line="474" TopLine="454"/>
+        <Caret Line="312" Column="76" TopLine="275"/>
       </Position4>
       <Position5>
         <Filename Value="retro.pas"/>
-        <Caret Line="475" TopLine="454"/>
+        <Caret Line="725" TopLine="701"/>
       </Position5>
       <Position6>
         <Filename Value="retro.pas"/>
-        <Caret Line="717" Column="53" TopLine="693"/>
+        <Caret Line="204" Column="13" TopLine="190"/>
       </Position6>
       <Position7>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="9" Column="29"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="312" Column="38" TopLine="284"/>
       </Position7>
       <Position8>
-        <Filename Value="retro3.pas"/>
-        <Caret Line="43" Column="12" TopLine="25"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="314" Column="26" TopLine="289"/>
       </Position8>
       <Position9>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="205" Column="19" TopLine="187"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="306" Column="13" TopLine="283"/>
       </Position9>
       <Position10>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="234" Column="7" TopLine="209"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="321" Column="160"/>
       </Position10>
       <Position11>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="246" Column="11" TopLine="228"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="124" Column="23" TopLine="85"/>
       </Position11>
       <Position12>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="316" Column="11" TopLine="314"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="664" Column="9" TopLine="625"/>
       </Position12>
       <Position13>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="1187" Column="91" TopLine="1163"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="800" Column="84" TopLine="764"/>
       </Position13>
       <Position14>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="7" Column="7"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="775" Column="108" TopLine="748"/>
       </Position14>
       <Position15>
-        <Filename Value="cwindows.pas"/>
-        <Caret Line="118" Column="3" TopLine="103"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="298" Column="4" TopLine="278"/>
       </Position15>
       <Position16>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="9" Column="30"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="222" Column="80" TopLine="195"/>
       </Position16>
       <Position17>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="177" Column="3" TopLine="159"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="255" TopLine="221"/>
       </Position17>
       <Position18>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="335" Column="6" TopLine="317"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="256" TopLine="221"/>
       </Position18>
       <Position19>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="481" Column="3" TopLine="461"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="258" TopLine="221"/>
       </Position19>
       <Position20>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="689" Column="5" TopLine="671"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="261" TopLine="223"/>
       </Position20>
       <Position21>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="730" Column="9" TopLine="712"/>
+        <Filename Value="retro.pas"/>
+        <Caret Line="263" TopLine="225"/>
       </Position21>
       <Position22>
         <Filename Value="retro.pas"/>
-        <Caret Line="53" Column="10" TopLine="35"/>
+        <Caret Line="264" TopLine="226"/>
       </Position22>
       <Position23>
         <Filename Value="retro.pas"/>
-        <Caret Line="111" Column="6" TopLine="93"/>
+        <Caret Line="265" TopLine="227"/>
       </Position23>
       <Position24>
         <Filename Value="retro.pas"/>
-        <Caret Line="179" Column="5" TopLine="158"/>
+        <Caret Line="266" TopLine="228"/>
       </Position24>
       <Position25>
         <Filename Value="retro.pas"/>
-        <Caret Line="218" Column="42" TopLine="194"/>
+        <Caret Line="268" TopLine="230"/>
       </Position25>
       <Position26>
         <Filename Value="retro.pas"/>
-        <Caret Line="222" Column="3" TopLine="203"/>
+        <Caret Line="250" Column="154" TopLine="240"/>
       </Position26>
       <Position27>
         <Filename Value="retro.pas"/>
-        <Caret Line="256" Column="100" TopLine="231"/>
+        <Caret Line="213" TopLine="197"/>
       </Position27>
       <Position28>
         <Filename Value="retro.pas"/>
-        <Caret Line="309" Column="3" TopLine="280"/>
+        <Caret Line="212" Column="34" TopLine="197"/>
       </Position28>
       <Position29>
         <Filename Value="retro.pas"/>
-        <Caret Line="650" Column="10" TopLine="635"/>
+        <Caret Line="265" Column="35" TopLine="252"/>
       </Position29>
+      <Position30>
+        <Filename Value="retro.pas"/>
+        <Caret Line="212" Column="30" TopLine="190"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="retro.pas"/>
+        <Line Value="213"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

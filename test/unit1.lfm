@@ -7,52 +7,8 @@ object Form1: TForm1
   LCLVersion = '4.0.0.3'
   OnClose = FormClose
   OnCreate = FormCreate
-  object fft1: TDSXFastFourier
-    OnGetData = fft1GetData
-    NumSamples = 524288
-    Left = 16
-    Top = 16
-  end
-  object fft2: TDSXFastFourier
-    OnGetData = fft2GetData
-    NumSamples = 16384
-    Left = 48
-    Top = 16
-  end
-  object fft3: TDSXFastFourier
-    OnGetData = fft3GetData
-    NumSamples = 131072
-    Left = 80
-    Top = 16
-  end
-  object fft4: TDSXFastFourier
-    OnGetData = fft4GetData
-    NumSamples = 524288
-    Left = 112
-    Top = 16
-  end
-  object fft5: TDSXFastFourier
-    OnGetData = fft5GetData
-    NumSamples = 4194304
-    Left = 144
-    Top = 16
-  end
-  object fft6: TDSXFastFourier
-    OnGetData = fft6GetData
-    NumSamples = 32768
-    Left = 176
-    Top = 16
-  end
-  object fft7: TDSXFastFourier
-    OnGetData = fft7GetData
-    NumSamples = 262144
-    Left = 120
-    Top = 66
-  end
-  object fft8: TDSXFastFourier
-    OnGetData = fft8GetData
-    NumSamples = 65536
-    Left = 168
-    Top = 72
+  object OpenDialog1: TOpenDialog
+    Left = 119
+    Top = 50
   end
 end
