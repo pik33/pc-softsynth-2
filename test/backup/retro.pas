@@ -112,9 +112,11 @@ var fh:integer;
  //      cvt:TSdl_audiocvt;
        il,currentil:integer;
 
-       currentdatasize, samplenum:int64;
-
-
+     currentdatasize, samplenum:int64;
+     xres:integer=1280;
+     yres:integer=720;
+     cxres:integer=1200;
+     cyres:integer=672;
 
     procedure initmachine(mode:integer);
     procedure stopmachine;
@@ -207,20 +209,18 @@ var  t,buf:int64;
      s:psdl_surface;
 
 begin
-s:=SDL_LoadBMP('.\lettuce.bmp');
 d:=SDL_Init(SDL_INIT_audio or SDL_INIT_video or SDL_INIT_events);
-    driver:=sdl_getrenderdriver(3);
-//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'best'); // make the scaled rendering look smoother.
+driver:=sdl_getrenderdriver(0);
 SDL_SetHint(SDL_HINT_RENDER_DIRECT3D_THREADSAFE, '1');
-if peek($70002)=1 then scr := SDL_CreateWindow( 'The Retromachine', 1920,1200 , SDL_WINDOW_fullscreen)
-else scr := SDL_CreateWindow( 'The Retromachine',  1792,1120, 0);
+if peek($70002)=1 then scr := SDL_CreateWindow( 'The Retromachine', xres,yres , SDL_WINDOW_fullscreen)
+else scr := SDL_CreateWindow( 'The Retromachine',  xres,yres, 0);
 sdlRenderer := SDL_CreateRenderer(scr,driver);
 SDL_SetRenderVSync(sdlRenderer, 1);
-if peek($70002)=1  then begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_XRGB8888,SDL_TEXTUREACCESS_STreaming,1920,1200);
-                                   SDL_SetRenderLogicalPresentation(sdlRenderer,1920,1200,SDL_LOGICAL_PRESENTATION_DISABLED);
+if peek($70002)=1  then begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_XRGB8888,SDL_TEXTUREACCESS_STreaming,xres,yres);
+                                   SDL_SetRenderLogicalPresentation(sdlRenderer,xres,yres,SDL_LOGICAL_PRESENTATION_DISABLED);
                                    end
-else begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_XRGB8888,SDL_TEXTUREACCESS_STreaming,1792,1120);
-                                   SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,SDL_LOGICAL_PRESENTATION_STRETCH);
+else begin sdlTexture := SDL_CreateTexture(sdlRenderer,SDL_PIXELFORMAT_XRGB8888,SDL_TEXTUREACCESS_STreaming,xres,yres);
+                                   SDL_SetRenderLogicalPresentation(sdlRenderer,xres,yres,SDL_LOGICAL_PRESENTATION_DISABLED);
                                    end ;
 
 sdl_hidecursor;             // hide sdl cursor
@@ -237,7 +237,7 @@ if (p2<>nil) then                           // the screen is prepared
   sdlevents;                              // get events from SDL and update system variables
   vblank1:=0;                             // tell them there is no vblank
   t:=gettime;                             // prepare for screen time measurement
-  if peek($70002)=1 then scrconvert(p2,raml^[$18001])  else  scrconvert2(p2,raml^[$18001]);        // convert the screen
+  scrconvert(p2,raml^[$18001]);       // convert the screen
   tim:=gettime-t;                         // get screen time for debug
   raml^[$18000]+=1;                       // increment frame counter
   vblank1:=1;                             // we are in vblank now
@@ -246,20 +246,18 @@ if (p2<>nil) then                           // the screen is prepared
 
   if (needrestart>0) then
     begin
-    if peek($70002)=0 then begin
+    if peek($70002)=0 then
+      begin
       if needrestart=2 then sdl_setwindowfullscreen(scr,false);
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_STRETCH);
       end
     else
       begin
       if needrestart=2 then sdl_setwindowfullscreen(scr,true);
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_DISABLED);
       end ;
     needrestart:=0;
     end;
 
-  if peek($70002)=1 then SDL_UpdateTexture(sdlTexture, nil, p2, 1920 * 4)   // render the screen
-  else SDL_UpdateTexture(sdlTexture,nil, p2, 1792 * 4) ;
+  SDL_UpdateTexture(sdlTexture, nil, p2, xres * 4);   // render the screen
   SDL_RenderClear(sdlRenderer);
   SDL_RenderTexture(sdlRenderer, sdlTexture,nil,nil);
   SDL_SetRenderVSync(sdlRenderer,1);
@@ -270,28 +268,17 @@ if (p2<>nil) then                           // the screen is prepared
   sdlevents;                              // process the second buffer
   vblank1:=0;
   t:=gettime;
-  if peek($70002)=1 then scrconvert(p3,raml^[$18001]) else  scrconvert2(p3,raml^[$18001]);
+  scrconvert(p3,raml^[$18001]);
   tim:=gettime-t;
   raml^[$18000]+=1;
   vblank1:=1;
 
   sprite(p3);
-    if (needrestart=1) then
-    begin
-    needrestart:=0;
-    if peek($70002)=0 then begin
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_STRETCH);
-      end
-    else
-    begin
-      SDL_SetRenderLogicalPresentation(sdlRenderer,1792,1120,  SDL_LOGICAL_PRESENTATION_DISABLED);
-      end ;
-    end;
+  if (needrestart=1) then       needrestart:=0;
   vblank;
   repeat until peek($70000)<2;
   poke ($70000,0);
-  if peek($70002)=1  then SDL_UpdateTexture(sdlTexture, nil, p3, 1920 * 4)
-  else  SDL_UpdateTexture(sdlTexture, nil, p3, 1792 * 4);
+  SDL_UpdateTexture(sdlTexture, nil, p3, xres * 4) ;
   SDL_RenderClear(sdlRenderer);
   d:=  SDL_Rendertexture(sdlRenderer, sdlTexture,nil,nil);
   SDL_SetRenderVSync(sdlRenderer,1);
@@ -332,7 +319,7 @@ fileclose(fh2);
 for i:=0 to 2047 do poke($50000+2048+i,peek($50000+i) xor $FF);
 
 fh2:=fileopen('./combinedwaveforms.bin',$40);   // load combined waveforms for SID
-fileread(fh2,combined,1024);
+fileread(fh2,combined,xres);
 fileclose(fh2);
 
 fh2:=fileopen('./mysz.def',$40);                // load mouse cursor definition at sprite 8
@@ -346,18 +333,18 @@ for i:=0 to 1023 do
 fileclose(fh2);
 
 for i:=0 to 31  do   begin
-raml^[$14800+32*i]:=$8080ff;
-raml^[$14800+32*i+1]:=$8080ff;
-raml^[$14800+32*i+2]:=$8080ff;
-raml^[$14c00+32*i]:=$ff8080;
-raml^[$14c00+32*i+1]:=$ff8080;
-raml^[$14c00+32*i+2]:=$ff8080;
+//raml^[$14800+32*i]:=$8080ff;
+//raml^[$14800+32*i+1]:=$8080ff;
+//raml^[$14800+32*i+2]:=$8080ff;
+//raml^[$14c00+32*i]:=$ff8080;
+//raml^[$14c00+32*i+1]:=$ff8080;
+//raml^[$14c00+32*i+2]:=$ff8080;
 end;
 
-lpoke($60040,$004a002d);
-lpoke($60044,$000a0001);
-lpoke($60048,$01a8002d);
-lpoke($6004c,$000a0001);
+//lpoke($60040,$004a002d);
+//lpoke($60044,$000a0001);
+//lpoke($60048,$01a8002d);
+//lpoke($6004c,$000a0001);
 
 
 fh2:=fileopen('./bmphead',$40);                // load mouse cursor definition at sprite 8
@@ -397,6 +384,7 @@ for i:=3 to 7 do
   raml^[$18010+2*i]:=$01001100;
   raml^[$18010+2*i]:=$00010001;
   end; // init sprites
+
 
 poke($70002,mode);
 thread:=tretro.create(true);   // start frame refreshing thread
@@ -530,10 +518,10 @@ if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
   begin
   x:=round(aevent.motion.x);
   y:=round(aevent.motion.y);
-  if (peek($70002)=1) and (x<64) then x:=64;
-  if (peek($70002)=1) and (x>1855) then x:=1855;
-  if (peek($70002)=1) and (y<40) then y:=40;
-  if (peek($70002)=1) and (y>1159) then y:=1159;
+  if (peek($70002)=1) and (x<32) then x:=32;
+  if (peek($70002)=1) and (x>991) then x:=991;
+  if (peek($70002)=1) and (y<30) then y:=30;
+  if (peek($70002)=1) and (y>569) then y:=569;
   ramw^[$30016]:=x;
   ramw^[$30017]:=y;
   end
@@ -633,18 +621,14 @@ raml^[$18001]:=$F000000;
 case mode of
 
    16: begin
-
        raml^[$18002]:=16;
-       raml^[$18008]:=1792;
-       raml^[$18009]:=1120;
+       raml^[$18008]:=cxres;
+       raml^[$18009]:=cyres;
        end;
-
-
-   else begin
-
+    else begin
         raml^[$18002]:=16;
-        raml^[$18008]:=1792;
-        raml^[$18009]:=1120;
+        raml^[$18008]:=cxres;
+        raml^[$18009]:=cyres;
         end;
     end;
 raml^[$18001]:=$F000000;
@@ -655,7 +639,7 @@ end;
 
 
 procedure scrconvert(screen:pointer;buf:integer);  //convert retro fb to raspberry fb @ graphics mode 16
-                                                      //1792x1120x64k
+                                                      //cxresxcyresx64k
 
 var
   b:integer;
@@ -668,21 +652,20 @@ buf:=buf shr 1;
 pi:=screen;
 b:=raml^[$18003];
 l:=0;
-for i:=0 to 39 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000)  ) mod 1024); for j:=0 to 1919  do (pi+i*1920+j)^:=b; end;
-k:=76800;
-for i:=40 to 1159 do
+for i:=0 to ((yres-cyres) div 2)-1 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000)  ) mod 1024); for j:=0 to xres-1 do (pi+i*xres+j)^:=b; end;
+k:=xres*((yres-cyres) div 2);
+for i:=(yres-cyres) div 2 to ((yres-cyres) div 2) +cyres-1 do
   begin
-  for j:=0 to 63 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000) ) mod 1024); (pi+k)^:=b; k+=1; end;
-  for j:=0 to 1791 do begin
-  (pi+k)^:=raml^[$4000+ramw^[buf+l]]; k+=1; l+=1; end;
-  for j:=0 to 63 do begin (pi+k)^:=b; k+=1; end;
+  for j:=0 to 31 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000) ) mod 1024); (pi+k)^:=b; k+=1; end;
+  for j:=0 to 959 do begin (pi+k)^:=raml^[$4000+ramw^[buf+l]]; k+=1; l+=1; end;
+  for j:=0 to 31 do begin (pi+k)^:=b; k+=1; end;
   end;
-for i:=1160 to 1199 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000) ) mod 1024); for j:=0 to 1919  do (pi+i*1920+j)^:=b; end;
+for i:=((yres-cyres) div 2) +cyres to yres-1 do begin if peek($70001)=0 then b:=lpeek($10000+4*((i div 4)+lpeek($60000) ) mod 1024); for j:=0 to xres-1  do (pi+i*xres+j)^:=b; end;
 end;
 
 procedure scrconvert2(screen:pointer;buf:integer);
 
-//1792x1120x64k   without border
+//cxresxcyresx64k   without border
 
 
 var pi:^integer;
@@ -720,7 +703,7 @@ var  s,xs,ys,offset,pixel, spritebase, spritedefs,ctrl1:integer;
                                 // defs @ 52000
 
 begin
-if peek($70002)=1 then s:=1920 else s:=1792;
+if peek($70002)=1 then s:=xres else s:=xres;
 if peek($70002)=1 then xs:=0 else xs:=0;
 if peek($70002)=1 then ys:=0 else ys:=0;
 pi:=screen;
@@ -818,13 +801,13 @@ procedure putpixel(x,y,color:integer);
 var adr:integer;
 
 begin
-if (x>=0) and (y>=0) and (x<1792) and (y<1120) then begin
+if (x>=0) and (y>=0) and (x<cxres) and (y<cyres) then begin
 if raml^[$18002]<16 then
-  begin adr:=$F000000+x+1792*y; if adr<$FFFFFFF then ramb^[adr]:=color; end
+  begin adr:=$F000000+x+cxres*y; if adr<$FFFFFFF then ramb^[adr]:=color; end
 else if (raml^[$18002]>=16) and (raml^[$18002]<32) then
-  begin adr:=$7800000+x+1792*y; if adr<$7FFFFFF then ramw^[adr]:=color; end
+  begin adr:=$7800000+x+cxres*y; if adr<$7FFFFFF then ramw^[adr]:=color; end
 else
-  begin adr:=$3c00000+x+1792*y; if adr<$3FFFFFF then raml^[adr]:=color; end;
+  begin adr:=$3c00000+x+cxres*y; if adr<$3FFFFFF then raml^[adr]:=color; end;
   end;
 end;
 
@@ -834,13 +817,13 @@ var adr:integer;
 
 begin
 getpixel:=0;
-if (x>=0) and (y>=0) and (x<1792) and (y<1120) then begin
+if (x>=0) and (y>=0) and (x<cxres) and (y<cyres) then begin
 if raml^[$18002]<16 then
-  begin adr:=$F000000+x+1792*y; if adr<$FFFFFFF then getpixel:=ramb^[adr]; end
+  begin adr:=$F000000+x+cxres*y; if adr<$FFFFFFF then getpixel:=ramb^[adr]; end
 else if (raml^[$18002]>=16) and (raml^[$18002]<32) then
-  begin adr:=$7800000+x+1792*y; if adr<$7FFFFFF then getpixel:=ramw^[adr]; end
+  begin adr:=$7800000+x+cxres*y; if adr<$7FFFFFF then getpixel:=ramw^[adr]; end
 else
-  begin adr:=$3c00000+x+1792*y; if adr<$3FFFFFF then getpixel:=raml^[adr]; end;
+  begin adr:=$3c00000+x+cxres*y; if adr<$3FFFFFF then getpixel:=raml^[adr]; end;
   end;
 end;
 
@@ -930,16 +913,16 @@ label a60008;
 begin
 //repeat until vblank1=0;
 if x<0 then begin l:=l+x; x:=0; end;
-if x>1792 then x:=1792;
+if x>cxres then x:=cxres;
 if y<0 then begin h:=h+y; y:=0; end;
-if y>1120 then y:=1120;
-if x+l>1792 then l:=1792-x-1;
-if y+h>1120 then h:=1120-y-1 ;
+if y>cyres then y:=cyres;
+if x+l>cxres then l:=cxres-x-1;
+if y+h>cyres then h:=cyres-y-1 ;
 if raml^[$18002]<16 then
   begin
   for j:=y to y+h-1 do
     begin
-    adr:=$F000000+1792*j;
+    adr:=$F000000+cxres*j;
     for i:=x to x+l-1 do ramb^[adr+i]:=c;
     end;
   end
@@ -947,7 +930,7 @@ else if (raml^[$18002]>=16) and (raml^[$18002]<32) then
   begin
   for j:=y to y+h-1 do
     begin
-    adr:=$7800000+1792*j;
+    adr:=$7800000+cxres*j;
     for i:=x to x+l-1 do ramw^[adr+i]:=c;
     end;
   end
@@ -955,7 +938,7 @@ else
   begin
   for j:=y to y+h-1 do
     begin
-    adr:=$3c00000+1792*j;
+    adr:=$3c00000+cxres*j;
     for i:=x to x+l-1 do raml^[adr+i]:=c;
     end;
   end

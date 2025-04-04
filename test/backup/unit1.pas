@@ -6,14 +6,11 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, cwindows, retro3, fft, math, audio;
+  ExtCtrls, cwindows, retro, fft, math, audio;
 
 
-const scaler=1.0045073642544625156647946943413;
-      fft192=0.0457763671875;
-      fft441=0.08411407470703125;
-//    const rld=1.0072464122237038980903435690978;  //1024 freqs
-      const rld=1.0036166659754629134913855149569;  //2048 freqs
+const ver='PC Softsynth 2 v. 1.92.20250402';
+
 type
 
   { TForm1 }
@@ -100,7 +97,7 @@ var h,m,s,t,l,i:integer;
    ts,ss,ms,hs,sss:string;
    hb,mb,sb:boolean;
 
-begin
+begin          {
 for i:=1 to 9 do waveform.line(40+170*i,365,0,320,245);
 for i:=1 to 9 do waveform.line(40+170*i,15,0,320,245);
 t5:=(eend-start)/10;
@@ -131,7 +128,7 @@ for i:=0 to 10 do
   waveform.outtextxy(40+170*i-l,694,sss,202);
   px+=t5;
   end;
-result:=sss;
+result:=sss;    }
 end;
 
 
@@ -145,35 +142,33 @@ poke($70001,1);
 retro.graphics(16);
 for i:=1 to 3 do setataripallette(i);
 cls(146);
-dpoke($6000c,$002040);
-ttt:=gettime;
-framecount:=raml^[$18000];
-box(0,0,1792,32,120);
-outtextxyz(450,8,'The retromachine sound project v. 0.10 --- 2016.04.21',156,2,1);
-box(0,1096,1792,24,120);
+//dpoke($6000c,$002040);
+//ttt:=gettime;
+//framecount:=raml^[$18000];
+//box(0,0,960,32,120);
+//outtextxyz(480-8*length(ver),8,ver,156,2,1);
+//box(0,516,540,24,120);
 
-waveform:=cmodalwindow.create(2,35,1788,758,1788,758,0,130,'Waveform view');
+//waveform:=cmodalwindow.create(2,35,958,480,958,480,0,130,'Waveform view');
+//waveform.redrawclient;
 
-
-waveform.redrawclient;
-
-control:=cmodalwindow.create(2,794,415,300,647,300,161,161,'Control');
-transport:=cmodalwindow.create(418,794,481,300,480,300,193,193,'Transport');
-fileparams:=cmodalwindow.create(900,794,890,300,659,300,241,241,'Wave parameters') ;
+//control:=cmodalwindow.create(2,794,415,300,647,300,161,161,'Control');
+//transport:=cmodalwindow.create(418,794,481,300,480,300,193,193,'Transport');
+//fileparams:=cmodalwindow.create(900,794,890,300,659,300,241,241,'Wave parameters') ;
 
 
-fileparams.outtextxy(4,4,'No file loaded.',24);
-fileparams.redrawclient;
-playbutton:=cbutton.create(436,1050,144,28,196,232,'Play',nil);
-pausebutton:=cbutton.create(586,1050,144,28,196,232,'Pause',nil);
-stopbutton:=cbutton.create(736,1050,144,28,36,232,'Stop',nil);
+//fileparams.outtextxy(4,4,'No file loaded.',24);
+//fileparams.redrawclient;
+//playbutton:=cbutton.create(436,1050,144,28,196,232,'Play',nil);
+//pausebutton:=cbutton.create(586,1050,144,28,196,232,'Pause',nil);
+//stopbutton:=cbutton.create(736,1050,144,28,36,232,'Stop',nil);
 
-openbutton:=cbutton.create(14,830,192,28,163,232,'Open',nil);
-noise:=cbutton.create(14,870,192,28,120,232,'Denoise',nil);
-click1:=cbutton.create(14,905,192,28,120,232,'Declick',nil);
-wowbutton:=cbutton.create(14,940,192,28,120,232,'Wow reduction',nil);
-quasibutton:=cbutton.create(14,975,192,28,120,232,'HQ noise reduction',nil);
-harmonicbutton:=cbutton.create(14,1010 ,192,28,120,232,'Sound enhance',nil);
+openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+//noise:=cbutton.create(14,870,192,28,120,232,'Denoise',nil);
+//click1:=cbutton.create(14,905,192,28,120,232,'Declick',nil);
+//wowbutton:=cbutton.create(14,940,192,28,120,232,'Wow reduction',nil);
+//quasibutton:=cbutton.create(14,975,192,28,120,232,'HQ noise reduction',nil);
+//harmonicbutton:=cbutton.create(14,1010 ,192,28,120,232,'Sound enhance',nil);
 //snrbutton:=cbutton.create(14,874,96,32,120,232,'SNR',nil);
 //widespecbutton:=cbutton.create(14,914,96,32,120,232,'Wide spc',nil);
 //anal2button:=cbutton.create(14,954,96,32,120,232,'Anal 2',nil);
@@ -182,9 +177,9 @@ harmonicbutton:=cbutton.create(14,1010 ,192,28,120,232,'Sound enhance',nil);
 //haaar:=cbutton.create(114,834 ,96,32,120,232,'Haar',nil);
 
 
-savebutton:=cbutton.create(14,1050 ,192,28,38,232,'Save',nil);
-recommendedbutton:=cbutton.create(214,1050 ,192,28,180,232,'Auto reconstruction',nil);
-toolsbutton:=cbutton.create(214,830 ,192,28,116,232,'Tools',nil);
+//savebutton:=cbutton.create(14,1050 ,192,28,38,232,'Save',nil);
+//recommendedbutton:=cbutton.create(214,1050 ,192,28,180,232,'Auto reconstruction',nil);
+//toolsbutton:=cbutton.create(214,830 ,192,28,116,232,'Tools',nil);
 end;
 
 procedure tools;
@@ -192,7 +187,7 @@ procedure tools;
 
 var i:integer;
 
-begin
+begin  {{
 sls:=cbutton.create(745,650,165,32,136,232,'Last spectrum',nil);
 haaar:=cbutton.create(575,610,335,32,136,232,'Haar',nil);
 
@@ -274,7 +269,7 @@ until temp=nil;
 scolor:=scolor.gofirst;
 scolor.highlight;
 scolor.select;
-for i:=0 to 3 do poke($81000+i,0);
+for i:=0 to 3 do poke($81000+i,0); }}
 end;
 
 
@@ -387,17 +382,17 @@ repeat
     end;
 
 
-  pausebutton.checkall;
-  stopbutton.checkall;
-  playbutton.checkall;
-  wowbutton.checkall;
-  quasibutton.checkall;
-  harmonicbutton.checkall;
-  savebutton.checkall;
-  recommendedbutton.checkall;
-  toolsbutton.checkall;
+ // pausebutton.checkall;
+ // stopbutton.checkall;
+ // playbutton.checkall;
+ // wowbutton.checkall;
+ // quasibutton.checkall;
+ // harmonicbutton.checkall;
+ // savebutton.checkall;
+ // recommendedbutton.checkall;
+ // toolsbutton.checkall;
 
-  if (toolsbutton.clicked=1) and (toolswindow=nil) then
+ { if (toolsbutton.clicked=1) and (toolswindow=nil) then
      begin
      toolswindow:=cwindow.create(568,132,365,577,365,577,256+147,256+144,'Tools');
      toolswindow.movable:=false;
@@ -408,7 +403,7 @@ repeat
 
 
   // if wave not playing, then unselect transport buttons
-  if juzmoznagrac=-1 then
+ // if juzmoznagrac=-1 then
 
     begin
     playbutton.unselect;
@@ -416,19 +411,19 @@ repeat
     pausebutton.unselect;
   //  playtime:=0;
     end;
+ }
+
+//  openbutton.checkall;
 
 
-  openbutton.checkall;
-
-
-  noise.checkall;
-  click1.checkall;
+//  noise.checkall;
+//  click1.checkall;
 
   //if pausebutton.selected then sdl_pauseaudio(1) else if playbutton.selected then sdl_pauseaudio(0);
-  fileparams.checkmouse;
+//  fileparams.checkmouse;
 
 
-
+ {
   if noise.clicked=1 then
     begin
     noise.clicked:=0;
@@ -491,7 +486,7 @@ repeat
       fileparams.redrawclient;
       waveform.redrawclient;
       end;
-
+ }
 p998:
 // ---------------  raster interrupts effect switch ----------------------------
 
