@@ -165,7 +165,11 @@ procedure uklad3;
 
 implementation
 
+{$ifdef windows}
 uses windows;
+{$else}
+uses baseunix,unix,linux;
+{$endif}
 
 constructor cmodalwindow.create(ax,ay,al,ah,alw,ahw,ac1,ac2:integer; atitle:string);
 
@@ -722,7 +726,7 @@ cls;
 
 ilf:=0;
 
-
+{$ifdef windows}
 try
 
   // Search all drive letters
@@ -745,7 +749,7 @@ try
 
 except
 end;
-
+{$endif}
 
 currentdir:=currentdir2+'*.*';
 if findfirst(currentdir,fadirectory,sr)=0 then
@@ -870,7 +874,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
     for d := 'A' to 'Z' do
     begin
     s := d + ':\';
-
+{$ifdef windows}
     case GetDriveType(PChar(s)) of
   {   DRIVE_REMOVABLE,}
      DRIVE_FIXED,
@@ -881,6 +885,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
                          ilf+=1;
                        end;
     end;
+{$endif}
   end;
 
 except

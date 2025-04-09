@@ -1,20 +1,20 @@
 object Form1: TForm1
-  Left = 301
+  Left = 383
   Height = 575
-  Top = 120
+  Top = 756
   Width = 923
   ActiveControl = BitBtn1
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'MalinaSoftsynth 0.07'
   ClientHeight = 575
   ClientWidth = 923
+  Position = poDesktopCenter
+  LCLVersion = '4.0.0.3'
   OnActivate = FormActivate
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnResize = FormResize
-  Position = poDesktopCenter
-  LCLVersion = '2.0.10.0'
   object Bevel3: TBevel
     Left = 4
     Height = 320
@@ -29,9 +29,9 @@ object Form1: TForm1
     Caption = 'Load song'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn1Click
     ParentFont = False
     TabOrder = 1
+    OnClick = BitBtn1Click
   end
   object BitBtn2: TBitBtn
     Left = 292
@@ -41,9 +41,9 @@ object Form1: TForm1
     Caption = 'Save song'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn2Click
     ParentFont = False
     TabOrder = 2
+    OnClick = BitBtn2Click
   end
   object BitBtn9: TBitBtn
     Left = 16
@@ -51,8 +51,8 @@ object Form1: TForm1
     Top = 340
     Width = 114
     Caption = 'PLAY'
-    OnClick = BitBtn9Click
     TabOrder = 3
+    OnClick = BitBtn9Click
   end
   object BitBtn10: TBitBtn
     Left = 292
@@ -62,9 +62,9 @@ object Form1: TForm1
     Caption = 'Quit'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn10Click
     ParentFont = False
     TabOrder = 4
+    OnClick = BitBtn10Click
   end
   object BitBtn3: TBitBtn
     Left = 292
@@ -74,9 +74,9 @@ object Form1: TForm1
     Caption = 'Wave editor'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn3Click
     ParentFont = False
     TabOrder = 5
+    OnClick = BitBtn3Click
   end
   object Label1: TLabel
     Left = 16
@@ -93,9 +93,9 @@ object Form1: TForm1
     Width = 262
     AutoSize = False
     AutoSelect = False
+    TabOrder = 0
     OnChange = Edit1Change
     OnKeyPress = Edit1KeyPress
-    TabOrder = 0
   end
   object BitBtn4: TBitBtn
     Left = 152
@@ -103,8 +103,8 @@ object Form1: TForm1
     Top = 373
     Width = 114
     Caption = 'Stop'
-    OnClick = BitBtn4Click
     TabOrder = 6
+    OnClick = BitBtn4Click
   end
   object BitBtn5: TBitBtn
     Left = 292
@@ -114,9 +114,9 @@ object Form1: TForm1
     Caption = 'Settings'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn5Click
     ParentFont = False
     TabOrder = 7
+    OnClick = BitBtn5Click
   end
   object BitBtn6: TBitBtn
     Left = 292
@@ -126,9 +126,9 @@ object Form1: TForm1
     Caption = 'Reset wavetables'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn6Click
     ParentFont = False
     TabOrder = 8
+    OnClick = BitBtn6Click
   end
   object Label2: TLabel
     Left = 28
@@ -153,27 +153,27 @@ object Form1: TForm1
     Caption = 'Import Atari song'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn7Click
     ParentFont = False
     TabOrder = 9
+    OnClick = BitBtn7Click
   end
   object CheckBox2: TCheckBox
     Left = 40
-    Height = 19
+    Height = 18
     Top = 496
-    Width = 75
+    Width = 73
     Caption = '11 KHz/4bit'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnChange = CheckBox2Change
     ParentFont = False
     TabOrder = 10
+    OnChange = CheckBox2Change
   end
   object CheckBox3: TCheckBox
     Left = 168
-    Height = 19
+    Height = 18
     Top = 476
-    Width = 54
+    Width = 52
     Caption = 'Repeat'
     Font.Height = -11
     Font.Name = 'Sans'
@@ -204,9 +204,9 @@ object Form1: TForm1
     Caption = 'Track editor'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn14Click
     ParentFont = False
     TabOrder = 12
+    OnClick = BitBtn14Click
   end
   object BitBtn15: TBitBtn
     Left = 292
@@ -216,9 +216,9 @@ object Form1: TForm1
     Caption = 'Export to Atari .lst'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn15Click
     ParentFont = False
     TabOrder = 13
+    OnClick = BitBtn15Click
   end
   object SpeedButton1: TSpeedButton
     Left = 152
@@ -232,27 +232,27 @@ object Form1: TForm1
   end
   object CheckBox5: TCheckBox
     Left = 40
-    Height = 19
+    Height = 18
     Top = 476
-    Width = 110
+    Width = 108
     Caption = 'Use Atari .s and .h'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = CheckBox5Click
     ParentFont = False
     TabOrder = 14
+    OnClick = CheckBox5Click
   end
   object CheckBox6: TCheckBox
     Left = 168
-    Height = 19
+    Height = 18
     Top = 500
-    Width = 73
+    Width = 71
     Caption = 'Save .wav'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnChange = CheckBox6Change
     ParentFont = False
     TabOrder = 15
+    OnChange = CheckBox6Change
   end
   object Memo1: TMemo
     Left = 12
@@ -268,13 +268,13 @@ object Form1: TForm1
     Lines.Strings = (
       'Ready'
     )
-    OnEnter = Memo1Enter
     ParentFont = False
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 16
     TabStop = False
     WantTabs = True
+    OnEnter = Memo1Enter
   end
   inline SynEdit1: TSynEdit
     Left = 424
@@ -827,6 +827,8 @@ object Form1: TForm1
       object SynGutterMarks1: TSynGutterMarks
         Width = 24
         MouseActions = <>
+        MaxExtraMarksColums = 0
+        Options = [sgmoDeDuplicateMarksOnOverflow]
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
         Width = 19
@@ -912,9 +914,9 @@ object Form1: TForm1
     Caption = 'New song'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn12Click
     ParentFont = False
     TabOrder = 18
+    OnClick = BitBtn12Click
   end
   object BitBtn16: TBitBtn
     Left = 292
@@ -924,9 +926,9 @@ object Form1: TForm1
     Caption = 'Midi->Masic'
     Font.Height = -11
     Font.Name = 'Sans'
-    OnClick = BitBtn16Click
     ParentFont = False
     TabOrder = 19
+    OnClick = BitBtn16Click
   end
   object Label5: TLabel
     Left = 123
@@ -959,6 +961,13 @@ object Form1: TForm1
     Width = 43
     Caption = 'Console'
     ParentColor = False
+  end
+  object Label8: TLabel
+    Left = 330
+    Height = 15
+    Top = 519
+    Width = 34
+    Caption = 'Label8'
   end
   object OpenDialog1: TOpenDialog
     Title = 'Load sample'

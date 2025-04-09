@@ -115,7 +115,7 @@ var
   test:integer ;
   iii, i,j,k,l,fh2,lines:integer;
 
-  event:tsdl_event;
+//  event:tsdl_event;
   licznik:integer=0;
   songname:string;
   q1,q2,q3:extended;
@@ -165,7 +165,11 @@ procedure uklad3;
 
 implementation
 
+{$ifdef windows}
 uses windows;
+{$else}
+uses baseunix,unix,linux;
+{$endif}
 
 constructor cmodalwindow.create(ax,ay,al,ah,alw,ahw,ac1,ac2:integer; atitle:string);
 
@@ -722,7 +726,7 @@ cls;
 
 ilf:=0;
 
-
+{$ifdef windows}
 try
 
   // Search all drive letters
@@ -745,7 +749,7 @@ try
 
 except
 end;
-
+{$endif}
 
 currentdir:=currentdir2+'*.*';
 if findfirst(currentdir,fadirectory,sr)=0 then

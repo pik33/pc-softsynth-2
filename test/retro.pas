@@ -50,7 +50,13 @@ unit retro;
 
 interface
 
-uses sdl3,sysutils,crt,classes,windows,forms,audio;
+uses sdl3,sysutils,crt,classes,forms,audio,
+
+{$ifdef WINDOWS}
+windows;
+{$ELSE}
+BaseUnix,unix, linux;
+{$ENDIF}
 
 type tram=array[0..67108863] of integer;
      tramw=array[0..134217727] of word;
@@ -310,8 +316,14 @@ var a,i:integer;
 
 begin
 
+{$IFDEF windows}
 r1:=virtualalloc(nil,268435456, MEM_COMMIT or MEM_RESERVE,PAGE_EXECUTE_READWRITE);  // get 256 MB ram
 p2:=virtualalloc(nil,20971520, MEM_COMMIT or MEM_RESERVE,PAGE_READWRITE);  // get the RAM for the framebuffer
+{$else}
+r1:=fpmmap(nil,268435456, PROT_EXEC or PROT_READ or PROT_WRITE, MAP_SHARED or MAP_ANON, 0, 0);
+p2:=fpmmap(nil,20971520,  PROT_EXEC or PROT_READ or PROT_WRITE, MAP_SHARED or MAP_ANON, 0, 0);
+
+{$endif}
 
 fh2:=fileopen('./st4font.def',$40);              // load 8x16 font
 fileread(fh2,ramb^[$50000],2048);
@@ -407,9 +419,13 @@ repeat until running=0;
 
 // free retromachine memory
 
+{$ifdef windows}
 virtualfree(p2,0,mem_release);
 virtualfree(r1,0,mem_release);
-
+{$else}
+fpmunmap(p2, 20971520 );
+fpmunmap(r1, 268435456);
+{$endif}
 end;
 
 //  ---------------------------------------------------------------------
@@ -481,13 +497,29 @@ end;
 
 function gettime:int64;
 
-var pf,tm:int64;
 
+{$ifdef windows}
+var pf,tm:int64;
 begin
 QueryPerformanceFrequency(pf);
 QueryPerformanceCounter(tm);
 gettime:=round(1000000*tm/pf);
 end;
+{$else}
+
+var  ts: TTimeSpec; t: timeval;
+begin
+  // use the Posix clock_gettime() call
+  if clock_gettime(CLOCK_MONOTONIC, @ts)=0 then
+  begin
+    gettime := ts.tv_sec * 1000000 + ts.tv_nsec div 1000;
+    Exit;
+  end;
+  // Use the FPC fallback
+  fpgettimeofday(@t,nil);
+  gettime := (t.tv_sec * 1000000) +  (t.tv_usec);
+end;
+{$endif}
 
 //  ---------------------------------------------------------------------
 //   procedure sdlevents
@@ -510,8 +542,9 @@ const x:integer=0;
       y:integer=0;
 
 begin
+repeat
 qqb:=sdl_pollevent(@aevent);
-if not qqb then goto p101;
+//if not qqb then goto p101;
 if aevent.window._type=SDL_EVENT_WINDOW_MOUSE_ENTER then needrestart:=1;
 if aevent.window._type=SDL_EVENT_WINDOW_CLOSE_REQUESTED then needclose:=1;
 if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
@@ -557,6 +590,8 @@ else if (aevent._type=SDL_EVENT_KEY_DOWN) then
   key:=(key shr 24) shl 8 + (key and $FF);
   dpoke($60028,key);
   end;
+
+until not qqb;
 p101:
 end;
 
