@@ -22,7 +22,6 @@
         <UnitName Value="Unit1"/>
         <TopLine Value="316"/>
         <CursorPos Y="145"/>
-        <ComponentState Value="1"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -41,8 +40,8 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="539"/>
-        <CursorPos X="95" Y="565"/>
+        <TopLine Value="500"/>
+        <CursorPos X="3" Y="555"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit3>

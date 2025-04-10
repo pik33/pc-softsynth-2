@@ -559,10 +559,10 @@ if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
   begin
   x:=round(aevent.motion.x);
   y:=round(aevent.motion.y);
-  if (peek($70002)=1) and (x<cxmin) then x:=cxmin SDL_WarpMouseInWindow(;
-  if (peek($70002)=1) and (x>cxmax) then x:=cxmax;
-  if (peek($70002)=1) and (y<cymin) then y:=cymin;
-  if (peek($70002)=1) and (y>cymax) then y:=cymax;
+  if (peek($70002)=1) and (x<cxmin) then begin x:=cxmin; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (x>cxmax) then begin x:=cxmax; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (y<cymin) then begin y:=cymin; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (y>cymax) then begin y:=cymax; SDL_WarpMouseInWindow(scr,x,y); end;
   ramw^[$30016]:=x;
   ramw^[$30017]:=y;
   end

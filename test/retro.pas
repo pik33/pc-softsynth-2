@@ -551,8 +551,8 @@ const x:integer=0;
 
 begin
 repeat
-qqb:=sdl_pollevent(@aevent);
-//if not qqb then goto p101;
+  qqb:=sdl_pollevent(@aevent);
+  //if not qqb then goto p101;
 if aevent.window._type=SDL_EVENT_WINDOW_MOUSE_ENTER then needrestart:=1;
 if aevent.window._type=SDL_EVENT_WINDOW_CLOSE_REQUESTED then needclose:=1;
 if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
