@@ -58,6 +58,16 @@ windows;
 BaseUnix,unix, linux;
 {$ENDIF}
 
+const xres=1280;
+      yres=720;
+      cxres=1200;
+      cyres=672;
+      cxmin=(xres-cxres) div 2;
+      cxmax=cxres+((xres-cxres) div 2)-1;
+      cymin=(yres-cyres) div 2;
+      cymax=cyres+((yres-cyres) div 2)-1;
+
+
 type tram=array[0..67108863] of integer;
      tramw=array[0..134217727] of word;
      tramb=array[0..268435455] of byte;
@@ -119,10 +129,8 @@ var fh:integer;
        il,currentil:integer;
 
      currentdatasize, samplenum:int64;
-     xres:integer=1280;
-     yres:integer=720;
-     cxres:integer=1200;
-     cyres:integer=672;
+
+
 
     procedure initmachine(mode:integer);
     procedure stopmachine;
@@ -551,10 +559,10 @@ if (aevent._type=SDL_EVENT_MOUSE_MOTION)  then
   begin
   x:=round(aevent.motion.x);
   y:=round(aevent.motion.y);
-  if (peek($70002)=1) and (x<32) then x:=32;
-  if (peek($70002)=1) and (x>991) then x:=991;
-  if (peek($70002)=1) and (y<30) then y:=30;
-  if (peek($70002)=1) and (y>569) then y:=569;
+  if (peek($70002)=1) and (x<cxmin) then begin x:=cxmin; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (x>cxmax) then begin x:=cxmax; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (y<cymin) then begin y:=cymin; SDL_WarpMouseInWindow(scr,x,y); end;
+  if (peek($70002)=1) and (y>cymax) then begin y:=cymax; SDL_WarpMouseInWindow(scr,x,y); end;
   ramw^[$30016]:=x;
   ramw^[$30017]:=y;
   end

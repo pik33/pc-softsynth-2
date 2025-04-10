@@ -142,7 +142,7 @@ poke($70001,1);
 retro.graphics(16);
 for i:=1 to 3 do setataripallette(i);
 cls(146);
-//dpoke($6000c,$002040);
+dpoke($6000c,$002040);
 //ttt:=gettime;
 //framecount:=raml^[$18000];
 //box(0,0,960,32,120);

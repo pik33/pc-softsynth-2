@@ -4,9 +4,10 @@ program project1;
 {$MAXSTACKSIZE 2000000000}
 
 uses
-
+{$ifdef windows}
+{$else}
   cthreads,
-
+{$endif}
   Interfaces, // this includes the LCL widgetset
   Forms, Unit1, cwindows, retro, fft1, audio
   { you can add units after this };
