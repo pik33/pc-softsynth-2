@@ -1,10 +1,10 @@
 object Form1: TForm1
-  Left = 470
+  Left = 172
   Height = 303
-  Top = 145
+  Top = 153
   Width = 533
   Caption = 'Form1'
-  LCLVersion = '4.0.0.3'
+  LCLVersion = '4.0.0.4'
   OnClose = FormClose
   OnCreate = FormCreate
   object OpenDialog1: TOpenDialog

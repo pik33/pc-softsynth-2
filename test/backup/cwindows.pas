@@ -874,7 +874,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
     for d := 'A' to 'Z' do
     begin
     s := d + ':\';
-
+{$ifdef windows}
     case GetDriveType(PChar(s)) of
   {   DRIVE_REMOVABLE,}
      DRIVE_FIXED,
@@ -885,6 +885,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
                          ilf+=1;
                        end;
     end;
+{$endif}
   end;
 
 except

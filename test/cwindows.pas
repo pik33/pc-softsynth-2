@@ -1281,6 +1281,7 @@ function cbutton.gofirst:cbutton;
 
 begin
 result:=self;
+if result=nil then exit;
 while result.last<>nil do result:=result.last;
 end;
 

@@ -177,7 +177,7 @@ openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
 //haaar:=cbutton.create(114,834 ,96,32,120,232,'Haar',nil);
 
 
-//savebutton:=cbutton.create(14,1050 ,192,28,38,232,'Save',nil);
+savebutton:=cbutton.create(14,470 ,192,28,38,232,'Save',nil);
 //recommendedbutton:=cbutton.create(214,1050 ,192,28,180,232,'Auto reconstruction',nil);
 //toolsbutton:=cbutton.create(214,830 ,192,28,116,232,'Tools',nil);
 end;
@@ -381,7 +381,7 @@ repeat
     goto p998;
     end;
 
-
+    openbutton.checkall;
  // pausebutton.checkall;
  // stopbutton.checkall;
  // playbutton.checkall;
