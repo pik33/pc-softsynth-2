@@ -50,33 +50,17 @@ Form1: TForm1;
 currentdir,currentdir2:string;
 b:byte;
 temp:cbutton;
-openbutton:cbutton;
+openataributton:cbutton;
+openmodulebutton:cbutton;
+openmidibutton:cbutton;
+saveataributton:cbutton;
+savemodulebutton:cbutton;
 playbutton:cbutton;
-stopbutton:cbutton;
-snrbutton:cbutton;
-widespecbutton:cbutton;
-anal2button:cbutton;
-syntbutton:cbutton;
 pausebutton:cbutton;
-test:cbutton;
-haaar:cbutton;
-fileparams:cwindow;
-tempwin:cwindow;
-transport:cwindow;
-control:cwindow;
-waveform:cwindow;
-noise:cbutton;
-click1: cbutton;
-savebutton:cbutton;
-wowbutton:cbutton;
-quasibutton:cbutton;
-harmonicbutton:cbutton;
-recommendedbutton:cbutton;
-toolsbutton:cbutton;
-toolswindow:cwindow;
+stopbutton:cbutton;
 
-start, range:cbutton;
-sbutton19:cbutton;
+trackerwindow:cwindow;
+
 
 
 implementation
@@ -163,7 +147,17 @@ dpoke($6000c,$002040);
 //pausebutton:=cbutton.create(586,1050,144,28,196,232,'Pause',nil);
 //stopbutton:=cbutton.create(736,1050,144,28,36,232,'Stop',nil);
 
-openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+//openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+
+openataributton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+openmodulebutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+openmidibutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+saveataributton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+savemodulebutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+playbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+pausebutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+stopbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+
 //noise:=cbutton.create(14,870,192,28,120,232,'Denoise',nil);
 //click1:=cbutton.create(14,905,192,28,120,232,'Declick',nil);
 //wowbutton:=cbutton.create(14,940,192,28,120,232,'Wow reduction',nil);
@@ -177,7 +171,7 @@ openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
 //haaar:=cbutton.create(114,834 ,96,32,120,232,'Haar',nil);
 
 
-savebutton:=cbutton.create(14,1050 ,192,28,38,232,'Save',nil);
+//savebutton:=cbutton.create(14,470 ,192,28,38,232,'Save',nil);
 //recommendedbutton:=cbutton.create(214,1050 ,192,28,180,232,'Auto reconstruction',nil);
 //toolsbutton:=cbutton.create(214,830 ,192,28,116,232,'Tools',nil);
 end;
@@ -350,38 +344,22 @@ repeat
       begin
       freeandnil(fs);
       application.processmessages;
-      fileparams.checkmouse;
-      fileparams.redrawclient;
-      waveform.redrawclient;
+ //     fileparams.checkmouse;
+ //     fileparams.redrawclient;
+ //     waveform.redrawclient;
       end;
     end;
 
-    if toolswindow<>nil then
-    begin
 
-    sls.checkall;
-    haaar.checkall;
-    sbutton.checkall;
-    sbutton19.checkall;
-    over.checkall;
-    wbutton.checkall;
-    wbutton10.checkall;
-    start.checkall;
-    range.checkall;
-    toolswindow.checkmouse;
 
-    if toolswindow.needdestroy then
-      begin
-      freeandnil(toolswindow);
-      application.processmessages;
-      fileparams.checkmouse;
-      fileparams.redrawclient;
-      waveform.redrawclient;
-      end;
-    goto p998;
-    end;
-
-    openbutton.checkall;
+    openataributton.checkall;
+openmodulebutton.checkall;
+openmidibutton.checkall;
+saveataributton.checkall;
+savemodulebutton.checkall;
+playbutton.checkall;
+pausebutton.checkall;
+stopbutton.checkall;
  // pausebutton.checkall;
  // stopbutton.checkall;
  // playbutton.checkall;
