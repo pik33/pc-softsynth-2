@@ -133,8 +133,8 @@ dpoke($6000c,$002040);
 //outtextxyz(480-8*length(ver),8,ver,156,2,1);
 //box(0,516,540,24,120);
 
-//waveform:=cmodalwindow.create(2,35,958,480,958,480,0,130,'Waveform view');
-//waveform.redrawclient;
+trackerwindow:=cwindow.create(2,35,958,480,958,480,0,130,'Tracker');
+trackerwindow.redrawclient;
 
 //control:=cmodalwindow.create(2,794,415,300,647,300,161,161,'Control');
 //transport:=cmodalwindow.create(418,794,481,300,480,300,193,193,'Transport');
@@ -149,7 +149,7 @@ dpoke($6000c,$002040);
 
 //openbutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
 
-openataributton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
+openataributton:=cbutton.create(14,0,192,28,163,232,'Open',nil);
 openmodulebutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
 openmidibutton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
 saveataributton:=cbutton.create(14,430,192,28,163,232,'Open',nil);
@@ -350,7 +350,7 @@ repeat
       end;
     end;
 
-
+  trackerwindow.checkmouse;
 
     openataributton.checkall;
 openmodulebutton.checkall;
@@ -360,6 +360,7 @@ savemodulebutton.checkall;
 playbutton.checkall;
 pausebutton.checkall;
 stopbutton.checkall;
+
  // pausebutton.checkall;
  // stopbutton.checkall;
  // playbutton.checkall;

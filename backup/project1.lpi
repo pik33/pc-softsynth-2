@@ -64,8 +64,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="2633"/>
         <CursorPos X="45" Y="3647"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="8">
@@ -178,7 +176,9 @@
       </Unit12>
       <Unit13>
         <Filename Value="../../03 Programowanie/20160421-retro-soundproject/cwindows.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
+        <CursorPos X="43" Y="22"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit13>

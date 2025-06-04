@@ -9,7 +9,7 @@ object Form1: TForm1
   ClientHeight = 575
   ClientWidth = 923
   Position = poDesktopCenter
-  LCLVersion = '4.0.0.3'
+  LCLVersion = '4.0.0.4'
   OnActivate = FormActivate
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery

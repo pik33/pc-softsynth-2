@@ -3644,7 +3644,7 @@ function sdl_sound_init:integer;
 
 // Zainicjuj bibliotekę sdl_sound
 
- var WindowSize: TSDL_Point = (x: 320; y: 200);
+ var WindowSize: TSDL_Point = (x: 1024; y: 600);
 
 begin
 Result:=0;

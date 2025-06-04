@@ -3860,7 +3860,7 @@ if opendialog1.execute then
   end;
 
 p101:
-  form1.caption:='Malina Softsynth '+ver+' --- '+opendialog1.filename;
+  form1.caption:='PC Softsynth '+ver+' --- '+opendialog1.filename;
 p102:
   closefile(f);
   synedit1.setfocus;
@@ -4042,7 +4042,7 @@ if opendialog2.execute then
   p101:
   fileclose(fh);
   edit1.setfocus;
-  form1.caption:='Malina Softsynth '+ver+' --- '+opendialog2.filename;
+  form1.caption:='PC Softsynth '+ver+' --- '+opendialog2.filename;
   emit(' ');
   emit(inttostr(count)+' lines loaded');
   emit('Ready');
