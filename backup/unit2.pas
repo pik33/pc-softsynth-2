@@ -10,7 +10,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, Spin, fft, sdl;
+  ExtCtrls, StdCtrls, Buttons, Spin, fft;
 
 type
 
@@ -567,6 +567,7 @@ begin
     checkbox11.checked:=true;
     checkbox12.checked:=false;
     chd:=true;
+    for i:=2 to 31 do h[i]:=0;
     end
   else
     begin
@@ -636,7 +637,7 @@ var t:integer;
 
 
 begin
-sdl_pauseaudio(0);
+//sdl_pauseaudio(0);
 indeksy2[-1]:=0;
 gain:=1;
 play:=false;
