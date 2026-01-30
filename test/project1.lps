@@ -8,7 +8,7 @@
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="9" Y="10"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -21,7 +21,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="333"/>
+        <TopLine Value="334"/>
         <CursorPos X="27" Y="353"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -39,7 +39,7 @@
       <Unit3>
         <Filename Value="retro.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="37"/>
         <CursorPos X="3" Y="555"/>
         <UsageCount Value="200"/>
@@ -215,11 +215,10 @@
       </Unit27>
       <Unit28>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\objpash.inc"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="184"/>
         <CursorPos X="23" Y="206"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit28>
     </Units>
     <JumpHistory Count="29" HistoryIndex="28">
